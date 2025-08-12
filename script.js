@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const pendingColumn = document.getElementById('pending-column');
     const approvedColumn = document.getElementById('approved-column');
-    const deniedColumn = document = document.getElementById('denied-column');
+    const deniedColumn = document.getElementById('denied-column');
 
     const pendingCardsContainer = document.getElementById('pending-cards');
     const approvedCardsContainer = document.getElementById('approved-cards');
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelFormButton = document.getElementById('cancel-form-button');
     const contratadoNickInput = document.getElementById('contratado-nick');
     const printUrlInput = document.getElementById('print-url');
-    const postUrlInput = document.getElementById('post-url');
+    const postUrlInput = document = document.getElementById('post-url');
 
     const rankingListBody = document.querySelector('#ranking-list tbody');
 
@@ -51,7 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // VARIÁVEIS DE ESTADO
     let currentUser = localStorage.getItem('currentUser');
     let hires = JSON.parse(localStorage.getItem('hires')) || [];
-    // Novo: students agora é um array de objetos
     let students = JSON.parse(localStorage.getItem('students')) || [];
 
     // FUNÇÕES
@@ -73,7 +72,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 loginError.textContent = 'Senha de admin incorreta.';
             }
         } else {
-            // Novo: Busca o estudante na lista
             const student = students.find(s => s.nick === nick);
             if (student && student.canApply) {
                 currentUser = nick;
@@ -104,7 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const isAdmin = currentUser === ADMIN_NICK;
             adminTabButton.classList.toggle('hidden', !isAdmin);
 
-            // Novo: Lógica para mostrar/esconder o botão de formulário
             const student = students.find(s => s.nick === currentUser);
             const canApply = isAdmin || (student && student.canApply);
             openFormButton.classList.toggle('hidden', !canApply);
@@ -249,12 +246,13 @@ document.addEventListener('DOMContentLoaded', () => {
             studentList.innerHTML = '';
             students.forEach(student => {
                 const li = document.createElement('li');
+                // Alterado: removida a classe 'active' do slider, o CSS fará isso
                 li.innerHTML = `
                     <span class="student-name">${student.nick}</span>
                     <div class="permission-control">
                         <label>
                             <input type="checkbox" data-nick="${student.nick}" ${student.canApply ? 'checked' : ''}>
-                            <span class="slider ${student.canApply ? 'active' : ''}"></span>
+                            <span class="slider"></span>
                         </label>
                         <button class="remove-student-btn" data-nick="${student.nick}">Remover</button>
                     </div>
@@ -273,7 +271,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const newNick = newStudentNickInput.value.trim();
             const existingStudent = students.find(s => s.nick === newNick);
             if (newNick && !existingStudent) {
-                // Novo: Adiciona estudante como objeto, com permissão desativada
                 students.push({ nick: newNick, canApply: false });
                 localStorage.setItem('students', JSON.stringify(students));
                 renderAdminPanel();
@@ -289,13 +286,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         } else if (target.type === 'checkbox') {
-            // Novo: Lida com a mudança no switch de permissão
             const nickToToggle = target.dataset.nick;
             const student = students.find(s => s.nick === nickToToggle);
             if (student) {
                 student.canApply = target.checked;
                 localStorage.setItem('students', JSON.stringify(students));
-                renderAdminPanel(); // Rerenderiza para atualizar o estado do slider
+                renderAdminPanel();
             }
         }
     }
