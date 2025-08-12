@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const isAdmin = nick === ADMIN_NICK;
 
         if (isAdmin) {
-            if (password === 'senhaadmin123') { // Defina a senha do admin aqui
+            if (password === 'super') { // Defina a senha do admin aqui
                 currentUser = nick;
                 localStorage.setItem('currentUser', currentUser);
                 loginOverlay.classList.remove('active');
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
         faltamCount.textContent = faltam;
     }
 
-    // Função modificada para adicionar a contagem aos cards e colunas
+    // Função modificada para corrigir o alinhamento do título "Análise Pendente"
     function renderHires() {
         pendingCardsContainer.innerHTML = '';
         approvedCardsContainer.innerHTML = '';
@@ -119,7 +119,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let approvedCount = 0;
         let deniedCount = 0;
 
-        // Filtra e renderiza os cards, atribuindo um número de ordem
         hires.forEach(hire => {
             let cardNumber = null;
             if (hire.status === 'approved') {
@@ -141,12 +140,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         // Atualiza o título das colunas com a contagem total
+        // Título Aprovados e Recusados mantêm a contagem alinhada à direita
         approvedColumn.querySelector('h2').innerHTML = `<span class="status-dot approved"></span>Contratados Aprovados <span class="count">(${approvedCount})</span>`;
         deniedColumn.querySelector('h2').innerHTML = `<span class="status-dot denied"></span>Submissões Recusadas <span class="count">(${deniedCount})</span>`;
+        
+        // Título Pendente tem seu próprio estilo de alinhamento
+        pendingColumn.querySelector('h2').style.justifyContent = 'center'; // Centraliza o conteúdo
+        pendingColumn.querySelector('h2').style.gap = '0.5rem';
         pendingColumn.querySelector('h2').innerHTML = `<span class="status-dot pending"></span>Análise Pendente`;
     }
 
-    // Função modificada para receber a numeração do card
     function createHireCard(hire, cardNumber) {
         const card = document.createElement('div');
         card.className = `hire-card ${hire.status}`;
@@ -345,4 +348,3 @@ document.addEventListener('DOMContentLoaded', () => {
     
     loginNickInput.addEventListener('input', toggleAdminPasswordInput);
 });
-
