@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const META_CONTRATACAO = 60;
 
     // IMPORTANTE: Defina aqui o Nick do Administrador e a SENHA DE ACESSO.
-    const ADMIN_NICK = 'CAPExeAdmin#0001'; 
+    const ADMIN_NICK = 'J2Z#013'; 
     const ADMIN_PASSWORD = 'supercap'; // Altere esta senha para algo seguro!
     
     // Carrega dados do localStorage ou inicia arrays vazios.
