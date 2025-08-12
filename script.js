@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // VARIÁVEIS DE CONFIGURAÇÃO
-    const ADMIN_NICK = 'J2Z#013';
+    const ADMIN_NICK = 'J2Z#1337'; // Defina o nick do admin aqui
 
     // SELETORES DE ELEMENTOS
     const loginOverlay = document.getElementById('login-overlay');
@@ -48,28 +48,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const restrictedNotice = document.getElementById('restricted-notice');
 
-    // VARIÁVEIS DE ESTADO E INICIALIZAÇÃO SEGURA
+    // VARIÁVEIS DE ESTADO
     let currentUser = localStorage.getItem('currentUser');
-    
-    // Tentativa de carregar dados, com tratamento de erro caso o JSON seja inválido
-    let hires = [];
-    try {
-        hires = JSON.parse(localStorage.getItem('hires')) || [];
-    } catch (e) {
-        console.error('Falha ao carregar hires do localStorage:', e);
-        localStorage.removeItem('hires');
-    }
-    
-    let students = [];
-    try {
-        students = JSON.parse(localStorage.getItem('students')) || [];
-    } catch (e) {
-        console.error('Falha ao carregar students do localStorage:', e);
-        localStorage.removeItem('students');
-    }
-
-    // Filtra a lista para remover entradas corrompidas
-    students = students.filter(s => s && typeof s === 'object' && s.nick);
+    let hires = JSON.parse(localStorage.getItem('hires')) || [];
+    let students = JSON.parse(localStorage.getItem('students')) || [];
 
     // FUNÇÕES
     function handleLogin(event) {
@@ -204,24 +186,34 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleCardAction(event) {
         const card = event.target.closest('.hire-card');
         const hireId = card.dataset.id;
-        
+        const action = event.target.textContent;
+
         if (event.target.classList.contains('approve-btn')) {
             showConfirmationModal('Tem certeza que deseja aprovar esta contratação?', () => {
-                hires = hires.map(h => h.id == hireId ? { ...h, status: 'approved' } : h);
-                localStorage.setItem('hires', JSON.stringify(hires));
-                renderApp();
+                const hireIndex = hires.findIndex(h => h.id == hireId);
+                if (hireIndex !== -1) {
+                    hires[hireIndex].status = 'approved';
+                    localStorage.setItem('hires', JSON.stringify(hires));
+                    renderApp();
+                }
             });
         } else if (event.target.classList.contains('deny-btn')) {
             showConfirmationModal('Tem certeza que deseja recusar esta contratação?', () => {
-                hires = hires.map(h => h.id == hireId ? { ...h, status: 'denied' } : h);
-                localStorage.setItem('hires', JSON.stringify(hires));
-                renderApp();
+                const hireIndex = hires.findIndex(h => h.id == hireId);
+                if (hireIndex !== -1) {
+                    hires[hireIndex].status = 'denied';
+                    localStorage.setItem('hires', JSON.stringify(hires));
+                    renderApp();
+                }
             });
         } else if (event.target.classList.contains('delete-btn')) {
             showConfirmationModal('Tem certeza que deseja excluir esta contratação? Esta ação é irreversível.', () => {
-                hires = hires.filter(h => h.id != hireId);
-                localStorage.setItem('hires', JSON.stringify(hires));
-                renderApp();
+                const hireIndex = hires.findIndex(h => h.id == hireId);
+                if (hireIndex !== -1) {
+                    hires.splice(hireIndex, 1);
+                    localStorage.setItem('hires', JSON.stringify(hires));
+                    renderApp();
+                }
             });
         }
     }
@@ -296,6 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (student) {
                 student.canApply = target.checked;
                 localStorage.setItem('students', JSON.stringify(students));
+                renderAdminPanel();
             }
         }
     }
