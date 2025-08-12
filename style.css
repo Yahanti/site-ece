@@ -229,7 +229,7 @@ button[type="submit"], #open-form-button {
 }
 button[type="submit"]:hover, #open-form-button:hover {
     background-color: var(--primary-red-dark);
-    box-shadow: 4px 20px rgba(255, 27, 27, 0.6);
+    box-shadow: 0 4px 20px rgba(255, 27, 27, 0.6);
 }
 .error-message { color: var(--primary-red); height: 1.2em; font-size: 0.9em; }
 
@@ -330,16 +330,9 @@ header {
     border-bottom: 2px solid #444; 
     font-family: 'Orbitron'; 
     font-size: 1.1em;
+    justify-content: space-between; /* Novo: alinha a contagem à direita */
 }
-
-/* NOVO: Classes para controlar o alinhamento dos títulos */
-.board-column h2.centered {
-    justify-content: center;
-}
-.board-column h2.spaced {
-    justify-content: space-between;
-}
-.board-column h2 span.count {
+.board-column h2 span { /* Novo: Estilo para a contagem */
     font-family: 'Montserrat', sans-serif;
     font-weight: 700;
     color: var(--primary-red);
@@ -361,7 +354,7 @@ header {
     box-shadow: 0 4px 10px rgba(0,0,0,0.5);
     overflow: hidden;
     cursor: pointer;
-    position: relative;
+    position: relative; /* Adicionado para posicionar o número */
 }
 /* Novo estilo para o número do card */
 .hire-card .card-number {
