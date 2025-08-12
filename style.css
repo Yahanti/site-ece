@@ -22,8 +22,8 @@ body {
     margin: 0;
     overflow-x: hidden;
     min-height: 100vh;
-    display: flex; /* Adicionado */
-    flex-direction: column; /* Adicionado */
+    display: flex;
+    flex-direction: column;
 }
 
 .logo {
@@ -230,13 +230,13 @@ button[type="submit"]:hover, #open-form-button:hover {
 
 /* NOVO: ESTILO PARA O CRÉDITO DO DESENVOLVEDOR */
 .developer-credit, .developer-credit-app {
-    position: static; /* Alterado para static */
-    margin-top: 2rem; /* Adicionado uma margem para espaçamento */
-    padding: 1rem; /* Adicionado padding para melhor visualização */
+    position: static;
+    margin-top: 2rem;
+    padding: 1rem;
     text-align: center;
     color: var(--text-muted);
     font-size: 0.8rem;
-    flex-shrink: 0; /* Adicionado */
+    flex-shrink: 0;
 }
 
 /* CABEÇALHO DO PAINEL */
@@ -307,9 +307,28 @@ header {
     background: var(--card-bg);
     padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem;
     border-left: 5px solid;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, height 0.3s ease, padding 0.3s ease;
     box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    overflow: hidden; /* Adicionado para esconder o conteúdo extra */
+    cursor: pointer;
 }
+
+.hire-card.minimized {
+    height: 50px;
+    padding-top: 0.7rem;
+    padding-bottom: 0.7rem;
+}
+
+.hire-card.minimized h3 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hire-card.minimized p, .hire-card.minimized .card-actions {
+    display: none;
+}
+
 .hire-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
 .hire-card.pending { border-color: var(--pending-color); }
 .hire-card.approved { border-color: var(--success-color); }
