@@ -224,7 +224,7 @@ button[type="submit"], #open-form-button {
 }
 button[type="submit"]:hover, #open-form-button:hover {
     background-color: var(--primary-red-dark);
-    box-shadow: 0 4px 20px rgba(255, 27, 27, 0.6);
+    box-shadow: 0 44px 20px rgba(255, 27, 27, 0.6);
 }
 .error-message { color: var(--primary-red); height: 1.2em; font-size: 0.9em; }
 
@@ -238,10 +238,10 @@ button[type="submit"]:hover, #open-form-button:hover {
     font-size: 0.8rem;
     flex-shrink: 0;
 }
-/* Adicionamos um estilo para os parágrafos dentro do rodapé */
+/* Estilo para os parágrafos dentro do rodapé */
 .developer-credit p, .developer-credit-app p {
-    display: block; /* Garante que cada p ocupa sua própria linha */
-    margin: 0;     /* Remove margens extras para não haver espaçamento indesejado */
+    display: block; 
+    margin: 0;     
 }
 
 /* CABEÇALHO DO PAINEL */
