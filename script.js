@@ -48,9 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderApp() {
-        // Esta função agora é responsável apenas por preencher o conteúdo do app,
-        // não por mostrar/esconder a tela principal.
-
         currentUserNickEl.textContent = currentUser;
 
         const isAdmin = currentUser === ADMIN_NICK;
@@ -170,7 +167,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     loginNickInput.value = '';
                     loginPasswordInput.value = '';
                     saveData();
-                    // Agora a transição é feita por aqui
                     loginOverlay.classList.remove('active');
                     appContainer.classList.remove('hidden');
                     renderApp();
@@ -184,7 +180,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 loginNickInput.value = '';
                 loginPasswordInput.value = '';
                 saveData();
-                // Agora a transição é feita por aqui
                 loginOverlay.classList.remove('active');
                 appContainer.classList.remove('hidden');
                 renderApp();
@@ -198,7 +193,6 @@ document.addEventListener('DOMContentLoaded', () => {
         currentUser = null;
         document.body.classList.remove('admin-logged-in');
         saveData();
-        // Agora a transição é feita por aqui
         loginOverlay.classList.add('active');
         appContainer.classList.add('hidden');
     }
