@@ -134,7 +134,7 @@ input {
     transition: all 0.2s ease;
 }
 
-/* Estilo para a checkbox de aprovação */
+/* Estilo para a lista de alunos no painel de admin */
 #student-list li {
     display: flex;
     align-items: center;
@@ -158,15 +158,50 @@ input {
     gap: 0.5rem;
 }
 
+/* NOVO: Estilo para o toggle switch */
 .permission-control label {
-    font-size: 0.8em;
-    color: var(--text-color);
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 22px;
 }
 
-.permission-control input[type="checkbox"] {
+.permission-control label input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.permission-control .slider {
+    position: absolute;
     cursor: pointer;
-    width: 16px;
-    height: 16px;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #555;
+    transition: 0.4s;
+    border-radius: 22px;
+}
+
+.permission-control .slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+.permission-control label input:checked + .slider {
+    background-color: var(--primary-red);
+}
+
+.permission-control label input:checked + .slider:before {
+    transform: translateX(18px);
 }
 
 input:focus { outline: none; border-color: var(--primary-red); box-shadow: 0 0 8px rgba(255, 27, 27, 0.4); }
@@ -476,6 +511,4 @@ header {
         text-transform: uppercase;
         color: var(--text-muted);
     }
-
 }
-
