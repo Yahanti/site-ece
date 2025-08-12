@@ -3,11 +3,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- CONFIGURAÇÃO E DADOS ---
     const META_CONTRATACAO = 60;
 
-    // IMPORTANTE: Defina aqui o Nick do Administrador e a SENHA DE ACESSO.
     const ADMIN_NICK = 'J2Z#013'; 
-    const ADMIN_PASSWORD = 'supercap'; // Altere esta senha para algo seguro!
+    const ADMIN_PASSWORD = 'supercap';
     
-    // Carrega dados do localStorage ou inicia arrays vazios.
+    // Carrega dados do localStorage ou inicia arrays vazios
     let hires = JSON.parse(localStorage.getItem('hiresData')) || [];
     let currentUser = localStorage.getItem('currentUser') === 'null' ? null : localStorage.getItem('currentUser');
     let allowedStudents = JSON.parse(localStorage.getItem('allowedStudents')) || [ADMIN_NICK, 'AlunoAprovador#1234', 'LiderEquipe#7777'];
@@ -335,3 +334,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loginNickInput.addEventListener('input', togglePasswordInput);
 });
+
