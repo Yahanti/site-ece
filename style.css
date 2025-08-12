@@ -47,6 +47,7 @@ body {
 }
 .overlay.active { opacity: 1; visibility: visible; }
 
+/* CORRIGIDO: Adicionei display: flex e flex-direction: column para centralizar tudo na caixa de login */
 #login-box, #form-box {
     background: var(--light-bg);
     padding: 2.5rem 3rem;
@@ -55,7 +56,12 @@ body {
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 27, 27, 0.2);
     text-align: center;
     width: 90%; max-width: 450px;
+    
+    display: flex; /* Adicionado para arrumar o layout */
+    flex-direction: column; /* Adicionado para empilhar os itens */
+    align-items: center; /* Adicionado para centralizar horizontalmente */
 }
+
 .motto {
     font-style: italic;
     font-size: 1.1em;
@@ -230,7 +236,7 @@ button[type="submit"]:hover, #open-form-button:hover {
 
 /* ESTILO CORRIGIDO PARA O CRÉDITO DO DESENVOLVEDOR */
 .developer-credit, .developer-credit-app {
-    position: absolute; /* Usar 'absolute' para posicioná-lo no rodapé */
+    position: absolute; 
     bottom: 2rem;
     left: 50%;
     transform: translateX(-50%);
@@ -242,10 +248,9 @@ button[type="submit"]:hover, #open-form-button:hover {
     font-size: 0.8rem;
     flex-shrink: 0;
 
-    /* AQUI ESTÁ A CORREÇÃO PRINCIPAL: empilhar o conteúdo verticalmente */
     display: flex;
     flex-direction: column;
-    align-items: center; /* Centraliza o texto */
+    align-items: center; 
 }
 
 /* CABEÇALHO DO PAINEL */
