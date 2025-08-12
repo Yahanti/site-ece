@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // NOVO: Adiciona o parâmetro isApprover
+    // NOVO: Adiciona o parâmetro isApprover para renderização condicional
     function renderCards(list, container, isApprover) {
         container.innerHTML = '';
         if (list.length === 0) {
@@ -186,21 +186,24 @@ document.addEventListener('DOMContentLoaded', () => {
         confirmationOverlay.classList.remove('active');
     });
     
-    // NOVO: Adiciona ou remove o aluno da lista de aprovadores
-    studentList.addEventListener('change', (e) => {
-        const target = e.target;
-        if (target.type === 'checkbox' && target.id.startsWith('approver-')) {
-            const studentNick = target.dataset.nick;
-            if (target.checked) {
-                if (!allowedApprovers.includes(studentNick)) {
-                    allowedApprovers.push(studentNick);
+    // NOVO: Evento para gerenciar a permissão de aprovação
+    if (studentList) {
+        studentList.addEventListener('change', (e) => {
+            const target = e.target;
+            if (target.type === 'checkbox' && target.id.startsWith('approver-')) {
+                const studentNick = target.dataset.nick;
+                if (target.checked) {
+                    if (!allowedApprovers.includes(studentNick)) {
+                        allowedApprovers.push(studentNick);
+                    }
+                } else {
+                    allowedApprovers = allowedApprovers.filter(nick => nick !== studentNick);
                 }
-            } else {
-                allowedApprovers = allowedApprovers.filter(nick => nick !== studentNick);
+                saveData();
+                renderApp(); // Atualiza a interface para refletir a mudança
             }
-            saveData();
-        }
-    });
+        });
+    }
 
     function togglePasswordInput() {
         const isCurrentUserAdmin = loginNickInput.value.trim() === ADMIN_NICK;
@@ -321,11 +324,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             showConfirmationModal(`Tem certeza que deseja remover ${nickToRemove}?`, () => {
                 allowedStudents = allowedStudents.filter(nick => nick !== nickToRemove);
-                // Remove o aluno também da lista de aprovadores, se ele estiver lá
                 allowedApprovers = allowedApprovers.filter(nick => nick !== nickToRemove);
                 saveData();
                 renderAdminPanel();
-                // Atualiza a interface principal caso um aprovador tenha sido removido
                 renderApp(); 
             });
         }
