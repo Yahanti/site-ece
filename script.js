@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // VARIÁVEIS DE CONFIGURAÇÃO
-    const ADMIN_NICK = 'J2Z#1337'; // Defina o nick do admin aqui
+    const ADMIN_NICK = 'J2Z#013'; // Defina o nick do admin aqui
 
     // SELETORES DE ELEMENTOS
     const loginOverlay = document.getElementById('login-overlay');
@@ -345,3 +345,4 @@ document.addEventListener('DOMContentLoaded', () => {
     
     loginNickInput.addEventListener('input', toggleAdminPasswordInput);
 });
+
