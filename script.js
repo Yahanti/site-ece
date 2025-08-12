@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `).join('');
     }
 
-    // Renderiza o label para o toggle switch corretamente
+    // CORRIGIDO: Renderiza o label com a classe 'active' se necessário
     function renderAdminPanel() {
         if (!studentList) return;
         studentList.innerHTML = allowedStudents.map(student => `
@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${student !== ADMIN_NICK ? `
                         <label>
                             <input type="checkbox" data-nick="${student}" ${allowedApprovers.includes(student) ? 'checked' : ''}>
-                            <span class="slider"></span>
+                            <span class="slider ${allowedApprovers.includes(student) ? 'active' : ''}"></span>
                         </label>
                         <button class="remove-student-btn" data-nick="${student}">Remover</button>
                     ` : ''}
@@ -185,26 +185,32 @@ document.addEventListener('DOMContentLoaded', () => {
         confirmationOverlay.classList.remove('active');
     });
     
-    // CORRIGIDO: Evento para gerenciar a permissão de aprovação de forma mais robusta
+    // CORRIGIDO: Adicionado listener para gerenciar o toggle
     if (studentList) {
         studentList.addEventListener('click', (e) => {
             const target = e.target;
             const checkbox = target.closest('li')?.querySelector('input[type="checkbox"]');
             
-            // Se o clique foi no checkbox ou no slider associado
-            if (checkbox && (target === checkbox || target.classList.contains('slider'))) {
+            if (checkbox) {
                 const studentNick = checkbox.dataset.nick;
-                const isChecked = checkbox.checked;
+                const slider = checkbox.nextElementSibling; // O slider é o irmão imediatamente após a checkbox
 
-                if (isChecked) {
+                // Inverte o estado da checkbox
+                checkbox.checked = !checkbox.checked;
+
+                // Alterna a classe 'active' do slider com base no novo estado da checkbox
+                if (checkbox.checked) {
+                    slider.classList.add('active');
                     if (!allowedApprovers.includes(studentNick)) {
                         allowedApprovers.push(studentNick);
                     }
                 } else {
+                    slider.classList.remove('active');
                     allowedApprovers = allowedApprovers.filter(nick => nick !== studentNick);
                 }
+
                 saveData();
-                renderApp();
+                // Não é necessário chamar renderApp() aqui para evitar re-renderização completa e piscar a tela
             }
         });
     }
@@ -239,11 +245,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 loginError.textContent = '';
                 loginNickInput.value = '';
                 loginPasswordInput.value = '';
-                saveData();
-                loginOverlay.classList.remove('active');
-                appContainer.classList.remove('hidden');
-                renderApp();
-            }
+                    saveData();
+                    loginOverlay.classList.remove('active');
+                    appContainer.classList.add('hidden');
+                    renderApp();
+                }
         } else {
             loginError.textContent = 'Acesso negado. Nick ou Numeração inválidos.';
         }
