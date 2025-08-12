@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // VARIÁVEIS DE CONFIGURAÇÃO
-    const ADMIN_NICK = 'J2Z#013'; // Defina o nick do admin aqui
+    const ADMIN_NICK = 'J2Z#1337'; // Nickname do administrador
 
-    // SELETORES DE ELEMENTOS
+    const API_URL = 'http://localhost:3000/api';
+
     const loginOverlay = document.getElementById('login-overlay');
     const loginNickInput = document.getElementById('login-nick');
     const loginPasswordInput = document.getElementById('login-password');
@@ -45,39 +45,54 @@ document.addEventListener('DOMContentLoaded', () => {
     const addStudentForm = document.getElementById('add-student-form');
     const newStudentNickInput = document.getElementById('new-student-nick');
     const studentList = document.getElementById('student-list');
+    
+    const restrictedNotice = document.getElementById('restricted-notice');
 
-    // VARIÁVEIS DE ESTADO
+    const auditTableBody = document.querySelector('#audit-table tbody');
+
     let currentUser = localStorage.getItem('currentUser');
-    let hires = JSON.parse(localStorage.getItem('hires')) || [];
-    let students = JSON.parse(localStorage.getItem('students')) || [];
+    let hires = []; 
+    let students = [];
+    let audit = [];
 
-    // FUNÇÕES
-    function handleLogin(event) {
+    async function handleLogin(event) {
         event.preventDefault();
         const nick = loginNickInput.value.trim();
         const password = loginPasswordInput.value.trim();
-        const isAdmin = nick === ADMIN_NICK;
+        const isAdmin = nick.toLowerCase() === ADMIN_NICK.toLowerCase(); 
+        
+        try {
+            const response = await fetch(`${API_URL}/students`);
+            if (!response.ok) throw new Error('Falha ao conectar com o servidor.');
+            students = await response.json();
+        } catch (error) {
+            loginError.textContent = 'Erro de conexão com o servidor. Verifique o terminal.';
+            return;
+        }
 
         if (isAdmin) {
-            if (password === 'senhaadmin123') { // Defina a senha do admin aqui
+            if (password === 'senhaadmin123') {
                 currentUser = nick;
                 localStorage.setItem('currentUser', currentUser);
                 loginOverlay.classList.remove('active');
                 appContainer.classList.remove('hidden');
                 loginError.textContent = '';
-                renderApp();
+                await renderApp();
             } else {
                 loginError.textContent = 'Senha de admin incorreta.';
             }
-        } else if (students.includes(nick)) {
-            currentUser = nick;
-            localStorage.setItem('currentUser', currentUser);
-            loginOverlay.classList.remove('active');
-            appContainer.classList.remove('hidden');
-            loginError.textContent = '';
-            renderApp();
         } else {
-            loginError.textContent = 'Nick não autorizado ou inválido.';
+            const student = students.find(s => s.nick === nick);
+            if (student && student.canApply) {
+                currentUser = nick;
+                localStorage.setItem('currentUser', currentUser);
+                loginOverlay.classList.remove('active');
+                appContainer.classList.remove('hidden');
+                loginError.textContent = '';
+                await renderApp();
+            } else {
+                loginError.textContent = 'Nick não autorizado ou inválido.';
+            }
         }
     }
 
@@ -91,15 +106,44 @@ document.addEventListener('DOMContentLoaded', () => {
         loginError.textContent = '';
     }
 
-    function renderApp() {
+    async function renderApp() {
         if (currentUser) {
             currentUserNickElement.textContent = currentUser;
-            const isAdmin = currentUser === ADMIN_NICK;
-            adminTabButton.classList.toggle('hidden', !isAdmin);
-            updateDashboard();
-            renderHires();
-            renderRanking();
-            renderAdminPanel();
+            
+            try {
+                const [hiresResponse, studentsResponse, auditResponse] = await Promise.all([
+                    fetch(`${API_URL}/hires`),
+                    fetch(`${API_URL}/students`),
+                    fetch(`${API_URL}/audit`)
+                ]);
+                
+                if (!hiresResponse.ok || !studentsResponse.ok || !auditResponse.ok) {
+                    throw new Error('Falha ao buscar dados.');
+                }
+
+                hires = await hiresResponse.json();
+                students = await studentsResponse.json();
+                audit = await auditResponse.json();
+
+                const isAdmin = currentUser.toLowerCase() === ADMIN_NICK.toLowerCase();
+                adminTabButton.classList.toggle('hidden', !isAdmin);
+                
+                const student = students.find(s => s.nick === currentUser);
+                const canDoAdminActions = isAdmin || (student && student.canApply); // Condição para exibir botões de aprovação/recusa
+                
+                openFormButton.classList.toggle('hidden', !canDoAdminActions);
+                restrictedNotice.classList.toggle('hidden', canDoAdminActions);
+
+                updateDashboard();
+                renderHires();
+                renderRanking();
+                renderAdminPanel();
+                renderAuditLog();
+
+            } catch (error) {
+                console.error('Erro ao buscar dados da API:', error);
+                alert('Não foi possível conectar ao servidor. Verifique se ele está rodando.');
+            }
         }
     }
 
@@ -110,7 +154,6 @@ document.addEventListener('DOMContentLoaded', () => {
         faltamCount.textContent = faltam;
     }
 
-    // Função modificada para adicionar a contagem aos cards e colunas
     function renderHires() {
         pendingCardsContainer.innerHTML = '';
         approvedCardsContainer.innerHTML = '';
@@ -119,7 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let approvedCount = 0;
         let deniedCount = 0;
 
-        // Filtra e renderiza os cards, atribuindo um número de ordem
         hires.forEach(hire => {
             let cardNumber = null;
             if (hire.status === 'approved') {
@@ -140,14 +182,24 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
-        // Atualiza o título das colunas com a contagem total
-        approvedColumn.querySelector('h2').innerHTML = `<span class="status-dot approved"></span>Contratados Aprovados <span class="count">(${approvedCount})</span>`;
-        deniedColumn.querySelector('h2').innerHTML = `<span class="status-dot denied"></span>Submissões Recusadas <span class="count">(${deniedCount})</span>`;
-        pendingColumn.querySelector('h2').innerHTML = `<span class="status-dot pending"></span>Análise Pendente`;
+        const pendingTitleH2 = pendingColumn.querySelector('h2');
+        pendingTitleH2.className = 'centered';
+        pendingTitleH2.innerHTML = `<span class="status-dot pending"></span>Análise Pendente`;
+        
+        const approvedTitleH2 = approvedColumn.querySelector('h2');
+        approvedTitleH2.className = 'spaced';
+        approvedTitleH2.innerHTML = `<span class="status-dot approved"></span>Contratados Aprovados <span class="count">(${approvedCount})</span>`;
+        
+        const deniedTitleH2 = deniedColumn.querySelector('h2');
+        deniedTitleH2.className = 'spaced';
+        deniedTitleH2.innerHTML = `<span class="status-dot denied"></span>Submissões Recusadas <span class="count">(${deniedCount})</span>`;
     }
 
-    // Função modificada para receber a numeração do card
     function createHireCard(hire, cardNumber) {
+        const isAdmin = currentUser && currentUser.toLowerCase() === ADMIN_NICK.toLowerCase();
+        const student = students.find(s => s.nick === currentUser);
+        const canApproveDeny = isAdmin || (student && student.canApply);
+
         const card = document.createElement('div');
         card.className = `hire-card ${hire.status}`;
         card.dataset.id = hire.id;
@@ -158,11 +210,11 @@ document.addEventListener('DOMContentLoaded', () => {
             <p><strong>Print:</strong> <a href="${hire.printUrl}" target="_blank">Visualizar</a></p>
             <p><strong>Post:</strong> <a href="${hire.postUrl}" target="_blank">Ver no Fórum</a></p>
             <div class="card-actions">
-                ${currentUser === ADMIN_NICK ? `
+                ${canApproveDeny ? `
                     ${hire.status === 'pending' ? `<button class="approve-btn">Aprovar</button>` : ''}
                     ${hire.status === 'pending' ? `<button class="deny-btn">Recusar</button>` : ''}
-                    <button class="delete-btn">Excluir</button>
                 ` : ''}
+                ${isAdmin ? `<button class="delete-btn">Excluir</button>` : ''}
             </div>
         `;
         return card;
@@ -170,34 +222,46 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function handleCardAction(event) {
         const card = event.target.closest('.hire-card');
+        if (!card) return;
+        
         const hireId = card.dataset.id;
-        const action = event.target.textContent;
-
-        if (event.target.classList.contains('approve-btn')) {
-            showConfirmationModal('Tem certeza que deseja aprovar esta contratação?', () => {
-                const hireIndex = hires.findIndex(h => h.id == hireId);
-                if (hireIndex !== -1) {
-                    hires[hireIndex].status = 'approved';
-                    localStorage.setItem('hires', JSON.stringify(hires));
+        const target = event.target;
+        
+        if (target.classList.contains('approve-btn')) {
+            showConfirmationModal('Tem certeza que deseja aprovar esta contratação?', async () => {
+                try {
+                    await fetch(`${API_URL}/hires/${hireId}/status`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status: 'approved', adminNick: currentUser })
+                    });
                     renderApp();
+                } catch (error) {
+                    console.error('Erro ao aprovar:', error);
                 }
             });
-        } else if (event.target.classList.contains('deny-btn')) {
-            showConfirmationModal('Tem certeza que deseja recusar esta contratação?', () => {
-                const hireIndex = hires.findIndex(h => h.id == hireId);
-                if (hireIndex !== -1) {
-                    hires[hireIndex].status = 'denied';
-                    localStorage.setItem('hires', JSON.stringify(hires));
+        } else if (target.classList.contains('deny-btn')) {
+            showConfirmationModal('Tem certeza que deseja recusar esta contratação?', async () => {
+                try {
+                    await fetch(`${API_URL}/hires/${hireId}/status`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status: 'denied', adminNick: currentUser })
+                    });
                     renderApp();
+                } catch (error) {
+                    console.error('Erro ao recusar:', error);
                 }
             });
-        } else if (event.target.classList.contains('delete-btn')) {
-            showConfirmationModal('Tem certeza que deseja excluir esta contratação? Esta ação é irreversível.', () => {
-                const hireIndex = hires.findIndex(h => h.id == hireId);
-                if (hireIndex !== -1) {
-                    hires.splice(hireIndex, 1);
-                    localStorage.setItem('hires', JSON.stringify(hires));
+        } else if (target.classList.contains('delete-btn')) {
+            showConfirmationModal('Tem certeza que deseja excluir esta contratação? Esta ação é irreversível.', async () => {
+                try {
+                    await fetch(`${API_URL}/hires/${hireId}?adminNick=${encodeURIComponent(currentUser)}`, {
+                        method: 'DELETE'
+                    });
                     renderApp();
+                } catch (error) {
+                    console.error('Erro ao excluir:', error);
                 }
             });
         }
@@ -208,10 +272,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const approvedHires = hires.filter(h => h.status === 'approved');
         const ranking = {};
 
-        approvedHires.forEach(hire => {
-            ranking[hire.submittedBy] = (ranking[hire.submittedBy] || 0) + 1;
+        students.forEach(student => {
+            ranking[student.nick] = 0;
         });
+        
+        if(currentUser && !ranking.hasOwnProperty(currentUser)) {
+            ranking[currentUser] = 0;
+        }
 
+        approvedHires.forEach(hire => {
+            if (ranking.hasOwnProperty(hire.submittedBy)) {
+                ranking[hire.submittedBy]++;
+            }
+        });
+        
         const sortedRanking = Object.entries(ranking).sort((a, b) => b[1] - a[1]);
 
         sortedRanking.forEach(([nick, count], index) => {
@@ -226,71 +300,143 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderAdminPanel() {
-        if (currentUser === ADMIN_NICK) {
+        if (currentUser.toLowerCase() === ADMIN_NICK.toLowerCase()) {
             studentList.innerHTML = '';
             students.forEach(student => {
                 const li = document.createElement('li');
                 li.innerHTML = `
-                    <span class="student-name">${student}</span>
-                    <button class="remove-student-btn" data-nick="${student}">Remover</button>
+                    <span class="student-name">${student.nick}</span>
+                    <div class="permission-control">
+                        <label>
+                            <input type="checkbox" data-nick="${student.nick}" ${student.canApply ? 'checked' : ''}>
+                            <span class="slider"></span>
+                        </label>
+                        <button class="remove-student-btn" data-nick="${student.nick}">Remover</button>
+                    </div>
                 `;
                 studentList.appendChild(li);
             });
         }
     }
-
-    function handleAdminPanel(event) {
-        event.preventDefault();
+    
+    async function handleAdminPanel(event) {
         const target = event.target;
-
-        if (target.id === 'add-student-form') {
+        
+        if (target.closest('#add-student-form')) {
+            event.preventDefault();
             const newNick = newStudentNickInput.value.trim();
-            if (newNick && !students.includes(newNick)) {
-                students.push(newNick);
-                localStorage.setItem('students', JSON.stringify(students));
-                renderAdminPanel();
-                newStudentNickInput.value = '';
+            if (!newNick.includes('#')) {
+                alert('Por favor, insira o nick completo no formato: nome#1234');
+                return;
+            }
+            if (newNick) {
+                try {
+                    const response = await fetch(`${API_URL}/students`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ nick: newNick })
+                    });
+                    if (response.ok) {
+                        newStudentNickInput.value = '';
+                        await renderApp();
+                    } else if (response.status === 409) {
+                        alert('Este membro já existe.');
+                    }
+                } catch (error) {
+                    console.error('Erro ao adicionar membro:', error);
+                }
             }
         } else if (target.classList.contains('remove-student-btn')) {
             const nickToRemove = target.dataset.nick;
-            if (nickToRemove !== ADMIN_NICK) {
-                showConfirmationModal(`Tem certeza que deseja remover ${nickToRemove}?`, () => {
-                    students = students.filter(s => s !== nickToRemove);
-                    localStorage.setItem('students', JSON.stringify(students));
-                    renderAdminPanel();
+            showConfirmationModal(`Tem certeza que deseja remover ${nickToRemove}?`, async () => {
+                try {
+                    await fetch(`${API_URL}/students/${encodeURIComponent(nickToRemove)}?adminNick=${encodeURIComponent(currentUser)}`, {
+                        method: 'DELETE'
+                    });
+                    await renderApp();
+                } catch (error) {
+                    console.error('Erro ao remover membro:', error);
+                    alert('Erro ao remover membro: ' + error.message);
+                }
+            });
+        } else if (target.type === 'checkbox') {
+            const nickToToggle = target.dataset.nick;
+            const canApply = target.checked;
+            try {
+                await fetch(`${API_URL}/students/${encodeURIComponent(nickToToggle)}/permission`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ canApply: canApply, adminNick: currentUser })
                 });
+                await renderApp();
+            } catch (error) {
+                console.error('Erro ao atualizar permissão:', error);
+                alert('Erro ao atualizar permissão: ' + error.message);
             }
         }
     }
+    
+    function renderAuditLog() {
+        auditTableBody.innerHTML = '';
+        audit.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        audit.forEach(log => {
+            const row = document.createElement('tr');
+            const date = new Date(log.timestamp);
+            row.innerHTML = `
+                <td data-label="Data/Hora">${date.toLocaleString()}</td>
+                <td data-label="Ação">${log.action}</td>
+                <td data-label="Alvo">${log.target}</td>
+                <td data-label="Admin">${log.admin}</td>
+            `;
+            auditTableBody.appendChild(row);
+        });
+    }
 
-    function handleFormSubmit(event) {
+    async function handleFormSubmit(event) {
         event.preventDefault();
         const newHire = {
-            id: Date.now(),
             nick: contratadoNickInput.value,
             printUrl: printUrlInput.value,
             postUrl: postUrlInput.value,
-            submittedBy: currentUser,
-            status: 'pending'
+            submittedBy: currentUser
         };
-        hires.push(newHire);
-        localStorage.setItem('hires', JSON.stringify(hires));
-        formModalOverlay.classList.remove('active');
-        addHireForm.reset();
-        renderApp();
+        
+        try {
+            const response = await fetch(`${API_URL}/hires`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newHire)
+            });
+            
+            if (response.ok) {
+                formModalOverlay.classList.remove('active');
+                addHireForm.reset();
+                renderApp();
+            } else {
+                console.error('Falha ao adicionar contratação');
+            }
+        } catch (error) {
+            console.error('Erro na requisição:', error);
+        }
     }
 
     function handleTabChange(event) {
         const activeTab = document.querySelector('.tab-content.active');
         const activeNav = document.querySelector('.nav-button.active');
-        activeTab.classList.remove('active');
-        activeTab.classList.add('hidden');
-        activeNav.classList.remove('active');
+        if (activeTab) {
+            activeTab.classList.remove('active');
+            activeTab.classList.add('hidden');
+        }
+        if (activeNav) {
+            activeNav.classList.remove('active');
+        }
 
         const newTabId = event.target.dataset.tab;
         const newTab = document.getElementById(newTabId);
-        newTab.classList.remove('hidden');
-        newTab.classList.add('active');
+        if (newTab) {
+            newTab.classList.remove('hidden');
+            newTab.classList.add('active');
+        }
         event.target.classList.add('active');
     }
 
@@ -309,11 +455,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function toggleAdminPasswordInput() {
-        const isCurrentUserAdmin = loginNickInput.value.trim() === ADMIN_NICK;
+        const isCurrentUserAdmin = loginNickInput.value.trim().toLowerCase() === ADMIN_NICK.toLowerCase(); 
         loginPasswordInput.classList.toggle('hidden', !isCurrentUserAdmin);
     }
     
-    // INICIALIZAÇÃO
+    openFormButton.addEventListener('click', () => {
+        formModalOverlay.classList.add('active');
+    });
+
     if (currentUser) {
         loginOverlay.classList.remove('active');
         appContainer.classList.remove('hidden');
@@ -323,10 +472,8 @@ document.addEventListener('DOMContentLoaded', () => {
         appContainer.classList.add('hidden');
     }
     
-    // EVENT LISTENERS
     loginForm.addEventListener('submit', handleLogin);
     logoutButton.addEventListener('click', handleLogout);
-    openFormButton.addEventListener('click', () => formModalOverlay.classList.add('active'));
     cancelFormButton.addEventListener('click', () => {
         formModalOverlay.classList.remove('active');
         addHireForm.reset();
@@ -338,7 +485,10 @@ document.addEventListener('DOMContentLoaded', () => {
     pendingCardsContainer.addEventListener('click', handleCardAction);
     approvedCardsContainer.addEventListener('click', handleCardAction);
     deniedCardsContainer.addEventListener('click', handleCardAction);
-    addStudentForm.addEventListener('submit', handleAdminPanel);
+    
+    if(addStudentForm) {
+        addStudentForm.addEventListener('submit', handleAdminPanel);
+    }
     if(studentList) {
         studentList.addEventListener('click', handleAdminPanel);
     }

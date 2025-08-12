@@ -1,97 +1,90 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CAPExe - Controle de Contratações v3</title>
-    <link rel="stylesheet" href="style.css">
+    <title>J2Z Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div id="login-overlay" class="overlay active">
         <div id="login-box">
             <h1 class="logo">CAPExe</h1>
-            <p class="motto">"Seja a lenda que transforma o impossível em meta."</p>
-
-            <div id="restricted-notice">
-                <h3>Uso Restrito</h3>
-                <p>Acesso exclusivo para membros autorizados.</p>
-            </div>
-
-            <p>Utilize seu Nick + Numeração para acessar o painel de controle.</p>
+            <p class="motto">O futuro do recrutamento está aqui.</p>
             <form id="login-form">
-                <input type="text" id="login-nick" placeholder="Seu Nick#0000" required>
-                <input type="password" id="login-password" placeholder="Senha do Admin" class="hidden">
-                <button type="submit">Conectar</button>
+                <input type="text" id="login-nick" placeholder="Seu Nick" required>
+                <input type="password" id="login-password" placeholder="Senha Admin" class="hidden">
+                <p id="login-error" class="error-message"></p>
+                <button type="submit">Entrar</button>
             </form>
-            <p id="login-error" class="error-message"></p>
+            <p class="developer-credit">
+                Desenvolvido por <a href="https://seuperfil.com" target="_blank">Seu Nome</a>
+            </p>
         </div>
-
-        <footer class="developer-credit">
-            <p>Desenvolvido por: &lt;/&gt; J2Z</p>
-        </footer>
     </div>
 
     <div id="app-container" class="hidden">
         <header>
             <h1 class="logo">CAPExe</h1>
             <div class="user-info">
-                <span>Conectado como: <strong id="current-user-nick"></strong></span>
-                <button id="logout-button">Desconectar</button>
+                <span id="current-user-nick"></span>
+                <button id="logout-button">Sair</button>
             </div>
         </header>
 
         <nav id="main-nav">
-            <button class="nav-button active" data-tab="hires-tab">Contratações</button>
+            <button class="nav-button active" data-tab="dashboard-tab">Dashboard</button>
+            <button class="nav-button" data-tab="hires-tab">Contratações</button>
             <button class="nav-button" data-tab="ranking-tab">Ranking</button>
-            <button class="nav-button" data-tab="admin-tab">Gerenciar Alunos</button>
-            <button class="nav-button" data-tab="future-1-tab">Em Breve</button>
-            <button class="nav-button" data-tab="future-2-tab">Em Breve</button>
+            <button class="nav-button hidden" data-tab="admin-tab">Admin</button>
+            <button class="nav-button" data-tab="audit-tab">Auditoria</button>
         </nav>
 
         <main>
-            <div id="hires-tab" class="tab-content active">
-                <section id="dashboard">
+            <div id="dashboard-tab" class="tab-content active">
+                <div id="dashboard">
                     <div class="metric">
-                        <h2>Aprovados</h2>
+                        <h2>Contratados Aprovados</h2>
                         <p id="contratados-count">0</p>
                     </div>
-                    <div class="metric meta">
-                        <h2>Meta Final</h2>
-                        <p>60</p>
-                    </div>
                     <div class="metric">
-                        <h2>Restantes</h2>
+                        <h2>Faltam para 60</h2>
                         <p id="faltam-count">60</p>
                     </div>
-                </section>
-    
-                <div class="add-new-button-container">
-                    <button id="open-form-button">▶ Submeter Nova Contratação</button>
                 </div>
-    
+            </div>
+
+            <div id="hires-tab" class="tab-content hidden">
+                <div class="hires-header">
+                    <h2>Gerenciar Contratações</h2>
+                    <button id="open-form-button" class="hidden">Adicionar Contratação</button>
+                </div>
+                <div id="restricted-notice" class="hidden">
+                    <p>Você não tem permissão para adicionar novas contratações. Fale com um administrador.</p>
+                </div>
                 <div id="hires-board">
-                    <div class="board-column" id="pending-column">
+                    <div id="pending-column" class="board-column">
                         <h2><span class="status-dot pending"></span>Análise Pendente</h2>
-                        <div class="cards-container" id="pending-cards"></div>
+                        <div id="pending-cards" class="cards-container"></div>
                     </div>
-                    <div class="board-column" id="approved-column">
+                    <div id="approved-column" class="board-column">
                         <h2><span class="status-dot approved"></span>Contratados Aprovados</h2>
-                        <div class="cards-container" id="approved-cards"></div>
+                        <div id="approved-cards" class="cards-container"></div>
                     </div>
-                    <div class="board-column" id="denied-column">
+                    <div id="denied-column" class="board-column">
                         <h2><span class="status-dot denied"></span>Submissões Recusadas</h2>
-                        <div class="cards-container" id="denied-cards"></div>
+                        <div id="denied-cards" class="cards-container"></div>
                     </div>
                 </div>
             </div>
 
             <div id="ranking-tab" class="tab-content hidden">
                 <div class="ranking-container">
-                    <h2>Ranking de Contratações Aprovadas</h2>
+                    <h2>Ranking de Contratações</h2>
                     <table id="ranking-list">
                         <thead>
                             <tr>
@@ -105,65 +98,99 @@
                     </table>
                 </div>
             </div>
-
+            
             <div id="admin-tab" class="tab-content hidden">
                 <div class="admin-panel">
-                    <h2>Gerenciar Alunos Autorizados</h2>
-                    <p>Adicione ou remova membros da equipe de aprovação. O admin não pode ser removido.</p>
+                    <h2>Gerenciar Membros</h2>
+                    <p>
+                        **Importante:** Insira o nick completo no formato `nome#1234`.
+                    </p>
                     <form id="add-student-form">
-                        <input type="text" id="new-student-nick" placeholder="Novo Nick#0000" required>
-                        <button type="submit">Adicionar Aluno</button>
+                        <input type="text" id="new-student-nick" placeholder="Nick do novo membro (ex: nome#1234)" required>
+                        <button type="submit">Adicionar Membro</button>
                     </form>
                     <div class="student-list-container">
-                        <h3>Membros Ativos</h3>
+                        <h3>Membros da Equipe</h3>
                         <ul id="student-list">
                             </ul>
                     </div>
                 </div>
             </div>
 
-            <div id="future-1-tab" class="tab-content hidden">
-                <div class="coming-soon">
-                    <p class="large-text">Em Breve</p>
-                    <p>Fique de olho, uma nova missão está a caminho!</p>
+            <div id="audit-tab" class="tab-content hidden">
+                <div class="audit-panel">
+                    <h2>Histórico de Auditoria</h2>
+                    <table id="audit-table">
+                        <thead>
+                            <tr>
+                                <th>Data/Hora</th>
+                                <th>Ação</th>
+                                <th>Alvo</th>
+                                <th>Admin</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            </tbody>
+                    </table>
                 </div>
             </div>
-            <div id="future-2-tab" class="tab-content hidden">
-                <div class="coming-soon">
-                    <p class="large-text">Em Breve</p>
-                    <p>Fique de olho, uma nova missão está a caminho!</p>
+
+            <div id="about-tab" class="tab-content hidden">
+                <div class="about-section">
+                    <h2 class="about-title">Sobre a <span class="logo">J2Z</span></h2>
+                    <div class="about-content">
+                        <p>
+                            A **J2Z** é uma equipe de elite dedicada ao aprimoramento da nossa comunidade no jogo. Nosso objetivo é recrutar e integrar novos talentos, garantindo que nossa equipe se mantenha forte, ativa e competitiva.
+                        </p>
+                        <p>
+                            Este painel foi criado para otimizar o processo de contratação e dar total transparência ao nosso sistema. Acreditamos que a meritocracia e a organização são a chave para o sucesso.
+                        </p>
+                        <div class="mission-vision">
+                            <div class="item">
+                                <h3>Nossa Missão</h3>
+                                <p>Tornar-se a equipe mais organizada e eficiente, focando no crescimento mútuo e na excelência em todas as nossas atividades.</p>
+                            </div>
+                            <div class="item">
+                                <h3>Nossa Visão</h3>
+                                <p>Ser reconhecidos como o padrão de qualidade e engajamento na comunidade, atraindo os melhores talentos e inspirando outros a seguirem nosso exemplo.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+
         </main>
+        
+        <p class="developer-credit-app">
+            Desenvolvido por <a href="https://seuperfil.com" target="_blank">J2Z</a>
+        </p>
+
     </div>
 
     <div id="form-modal-overlay" class="overlay">
         <div id="form-box">
-            <h2>Submeter Contratação</h2>
+            <h3>Adicionar Nova Contratação</h3>
             <form id="add-hire-form">
-                <div class="form-group">
-                    <label for="contratado-nick">Nick do Contratado:</label>
-                    <input type="text" id="contratado-nick" required>
-                </div>
-                <div class="form-group">
-                    <label for="print-url">URL: Print System + Perfil Aberto</label>
-                    <input type="url" id="print-url" placeholder="https://i.imgur.com/..." required>
-                </div>
-                <div class="form-group">
-                    <label for="post-url">URL: Postagem no Formulário de Controle</label>
-                    <input type="url" id="post-url" placeholder="https://i.imgur.com/..." required>
-                </div>
-                <div class="form-actions">
-                    <button type="button" id="cancel-form-button">Cancelar</button>
-                    <button type="submit">Enviar para Análise</button>
+                <input type="text" id="contratado-nick" placeholder="Nick do contratado" required>
+                <input type="url" id="print-url" placeholder="URL do print da contratação" required>
+                <input type="url" id="post-url" placeholder="URL do post no fórum" required>
+                <div id="form-actions">
+                    <button type="button" id="cancel-form-button" class="cancel-btn">Cancelar</button>
+                    <button type="submit">Adicionar</button>
                 </div>
             </form>
         </div>
     </div>
-    
-    <footer class="developer-credit-app">
-        <p>Desenvolvido por: &lt;/&gt; J2Z</p>
-    </footer>
+
+    <div id="confirmation-overlay" class="overlay">
+        <div class="modal-box">
+            <h3 id="confirmation-message"></h3>
+            <div class="modal-actions">
+                <button id="cancel-confirmation-btn" class="cancel-btn">Não</button>
+                <button id="confirm-action-btn">Sim</button>
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
