@@ -55,7 +55,13 @@ body {
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 27, 27, 0.2);
     text-align: center;
     width: 90%; max-width: 450px;
+    
+    /* Adicionado para centralizar e empilhar o conteúdo da caixa */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
+
 .motto {
     font-style: italic;
     font-size: 1.1em;
@@ -228,15 +234,23 @@ button[type="submit"]:hover, #open-form-button:hover {
 }
 .error-message { color: var(--primary-red); height: 1.2em; font-size: 0.9em; }
 
-/* NOVO: ESTILO PARA O CRÉDITO DO DESENVOLVEDOR */
+/* CORREÇÃO DO RODAPÉ: Use 'position: absolute' para fixá-lo no final da página */
 .developer-credit, .developer-credit-app {
-    position: static;
-    margin-top: 2rem;
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
     padding: 1rem;
     text-align: center;
     color: var(--text-muted);
     font-size: 0.8rem;
     flex-shrink: 0;
+
+    /* Adicionado para empilhar o conteúdo verticalmente */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* CABEÇALHO DO PAINEL */
@@ -295,7 +309,7 @@ header {
 
 /* PAINEL KANBAN */
 #hires-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
-.board-column h2 { display: flex; align-items: center; gap: 0.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid #444; font-family: 'Orbitron'; font-size: 1.1em;}
+.board-column h2 { display: flex; align-items: center; gap: 0.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid #444; font-family: 'Orbitron'; font-size: 1.1em; }
 .status-dot { width: 12px; height: 12px; border-radius: 50%; }
 .status-dot.pending { background-color: var(--pending-color); }
 .status-dot.approved { background-color: var(--success-color); }
@@ -309,7 +323,7 @@ header {
     border-left: 5px solid;
     transition: transform 0.2s ease, box-shadow 0.2s ease, height 0.3s ease, padding 0.3s ease;
     box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-    overflow: hidden; /* Adicionado para esconder o conteúdo extra */
+    overflow: hidden;
     cursor: pointer;
 }
 
