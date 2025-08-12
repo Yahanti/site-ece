@@ -73,6 +73,42 @@ body {
     background: var(--primary-red);
 }
 
+/* ESTILO PARA O MODAL DE CONFIRMAÇÃO */
+.modal-box {
+    background: var(--light-bg);
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 27, 27, 0.2);
+    text-align: center;
+    width: 90%;
+    max-width: 400px;
+}
+.modal-box h3 {
+    font-size: 1.2rem;
+    color: var(--text-color);
+    margin-bottom: 1.5rem;
+}
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+.cancel-btn {
+    background-color: #444;
+    color: var(--text-color);
+}
+.cancel-btn:hover {
+    background-color: #555;
+}
+.delete-btn {
+    background-color: var(--primary-red-dark);
+    color: #fff;
+}
+.delete-btn:hover {
+    background-color: var(--primary-red);
+}
+
 /* NOVO: ESTILO PARA AVISO DE USO RESTRITO */
 #restricted-notice {
     margin-top: -1.5rem;
@@ -404,4 +440,5 @@ header {
         text-transform: uppercase;
         color: var(--text-muted);
     }
+
 }
