@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- CONFIGURAÇÃO E DADOS ---
     const META_CONTRATACAO = 60;
-    const MINIMIZE_THRESHOLD = 10; // O novo limite para minimizar TODOS os cards
+    const MINIMIZE_THRESHOLD = 5; // O novo limite para minimizar TODOS os cards
 
     // IMPORTANTE: Defina aqui o Nick do Administrador e a SENHA DE ACESSO.
     const ADMIN_NICK = 'J2Z#013'; 
@@ -403,3 +403,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loginNickInput.addEventListener('input', togglePasswordInput);
 });
+
