@@ -22,8 +22,6 @@ body {
     margin: 0;
     overflow-x: hidden;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
 }
 
 .logo {
@@ -55,13 +53,7 @@ body {
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 27, 27, 0.2);
     text-align: center;
     width: 90%; max-width: 450px;
-    
-    /* Adicionado para centralizar e empilhar o conteúdo da caixa */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
 }
-
 .motto {
     font-style: italic;
     font-size: 1.1em;
@@ -79,42 +71,6 @@ body {
     width: 50px;
     height: 2px;
     background: var(--primary-red);
-}
-
-/* ESTILO PARA O MODAL DE CONFIRMAÇÃO */
-.modal-box {
-    background: var(--light-bg);
-    padding: 2rem;
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 27, 27, 0.2);
-    text-align: center;
-    width: 90%;
-    max-width: 400px;
-}
-.modal-box h3 {
-    font-size: 1.2rem;
-    color: var(--text-color);
-    margin-bottom: 1.5rem;
-}
-.modal-actions {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-}
-.cancel-btn {
-    background-color: #444;
-    color: var(--text-color);
-}
-.cancel-btn:hover {
-    background-color: #555;
-}
-.delete-btn {
-    background-color: var(--primary-red-dark);
-    color: #fff;
-}
-.delete-btn:hover {
-    background-color: var(--primary-red);
 }
 
 /* NOVO: ESTILO PARA AVISO DE USO RESTRITO */
@@ -141,78 +97,6 @@ input {
     color: var(--text-color); font-size: 1rem; box-sizing: border-box;
     transition: all 0.2s ease;
 }
-
-/* Estilo para a lista de alunos no painel de admin */
-#student-list li {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid var(--border-color);
-}
-
-#student-list li:last-child {
-    border-bottom: none;
-}
-
-#student-list li .student-name {
-    flex-grow: 1;
-    text-align: left;
-}
-
-.permission-control {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-/* NOVO: Estilo para o toggle switch */
-.permission-control label {
-    position: relative;
-    display: inline-block;
-    width: 40px;
-    height: 22px;
-}
-
-.permission-control label input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.permission-control .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #555;
-    transition: 0.4s;
-    border-radius: 22px;
-}
-
-.permission-control .slider:before {
-    position: absolute;
-    content: "";
-    height: 18px;
-    width: 18px;
-    left: 2px;
-    bottom: 2px;
-    background-color: white;
-    transition: 0.4s;
-    border-radius: 50%;
-}
-
-/* NOVO: Classe para o estado 'ativo' do slider */
-.permission-control .slider.active {
-    background-color: var(--primary-red);
-}
-
-.permission-control .slider.active:before {
-    transform: translateX(18px);
-}
-
 input:focus { outline: none; border-color: var(--primary-red); box-shadow: 0 0 8px rgba(255, 27, 27, 0.4); }
 
 button {
@@ -234,23 +118,14 @@ button[type="submit"]:hover, #open-form-button:hover {
 }
 .error-message { color: var(--primary-red); height: 1.2em; font-size: 0.9em; }
 
-/* CORREÇÃO DO RODAPÉ: Use 'position: absolute' para fixá-lo no final da página */
+/* NOVO: ESTILO PARA O CRÉDITO DO DESENVOLVEDOR */
 .developer-credit, .developer-credit-app {
     position: absolute;
-    bottom: 2rem;
+    bottom: 1rem;
     left: 50%;
     transform: translateX(-50%);
-    width: 100%;
-    padding: 1rem;
-    text-align: center;
     color: var(--text-muted);
     font-size: 0.8rem;
-    flex-shrink: 0;
-
-    /* Adicionado para empilhar o conteúdo verticalmente */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
 }
 
 /* CABEÇALHO DO PAINEL */
@@ -294,7 +169,7 @@ header {
     color: var(--primary-red);
     border-bottom-color: var(--primary-red);
 }
-.tab-content { padding: 2rem; flex-grow: 1; }
+.tab-content { padding: 2rem; }
 
 /* PAINEL DE MÉTRICAS */
 #dashboard {
@@ -309,7 +184,7 @@ header {
 
 /* PAINEL KANBAN */
 #hires-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
-.board-column h2 { display: flex; align-items: center; gap: 0.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid #444; font-family: 'Orbitron'; font-size: 1.1em; }
+.board-column h2 { display: flex; align-items: center; gap: 0.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid #444; font-family: 'Orbitron'; font-size: 1.1em;}
 .status-dot { width: 12px; height: 12px; border-radius: 50%; }
 .status-dot.pending { background-color: var(--pending-color); }
 .status-dot.approved { background-color: var(--success-color); }
@@ -321,28 +196,9 @@ header {
     background: var(--card-bg);
     padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem;
     border-left: 5px solid;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, height 0.3s ease, padding 0.3s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
     box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-    overflow: hidden;
-    cursor: pointer;
 }
-
-.hire-card.minimized {
-    height: 50px;
-    padding-top: 0.7rem;
-    padding-bottom: 0.7rem;
-}
-
-.hire-card.minimized h3 {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.hire-card.minimized p, .hire-card.minimized .card-actions {
-    display: none;
-}
-
 .hire-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
 .hire-card.pending { border-color: var(--pending-color); }
 .hire-card.approved { border-color: var(--success-color); }
@@ -359,7 +215,7 @@ header {
 .approve-btn { background-color: var(--success-color); color: #fff; }
 .deny-btn { background-color: var(--primary-red-dark); color: #fff; }
 .delete-btn { background-color: transparent; color: var(--delete-color); border: 1px solid var(--delete-color); }
-.delete-btn:hover { background-color: var(--delete-color); color: #000; }
+.delete-btn:hover { background-color: var(--delete-color); color: #0d0d0d; }
 
 /* FORMULÁRIO */
 #form-actions { margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 1rem; }
