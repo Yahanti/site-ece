@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const pendingColumn = document.getElementById('pending-column');
     const approvedColumn = document.getElementById('approved-column');
-    const deniedColumn = document.getElementById('denied-column');
+    const deniedColumn = document = document.getElementById('denied-column');
 
     const pendingCardsContainer = document.getElementById('pending-cards');
     const approvedCardsContainer = document.getElementById('approved-cards');
@@ -45,10 +45,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const addStudentForm = document.getElementById('add-student-form');
     const newStudentNickInput = document.getElementById('new-student-nick');
     const studentList = document.getElementById('student-list');
+    
+    const restrictedNotice = document.getElementById('restricted-notice');
 
     // VARIÁVEIS DE ESTADO
     let currentUser = localStorage.getItem('currentUser');
     let hires = JSON.parse(localStorage.getItem('hires')) || [];
+    // Novo: students agora é um array de objetos
     let students = JSON.parse(localStorage.getItem('students')) || [];
 
     // FUNÇÕES
@@ -57,9 +60,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const nick = loginNickInput.value.trim();
         const password = loginPasswordInput.value.trim();
         const isAdmin = nick === ADMIN_NICK;
-
+        
         if (isAdmin) {
-            if (password === 'senhaadmin123') { // Defina a senha do admin aqui
+            if (password === 'senhaadmin123') {
                 currentUser = nick;
                 localStorage.setItem('currentUser', currentUser);
                 loginOverlay.classList.remove('active');
@@ -69,15 +72,19 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 loginError.textContent = 'Senha de admin incorreta.';
             }
-        } else if (students.includes(nick)) {
-            currentUser = nick;
-            localStorage.setItem('currentUser', currentUser);
-            loginOverlay.classList.remove('active');
-            appContainer.classList.remove('hidden');
-            loginError.textContent = '';
-            renderApp();
         } else {
-            loginError.textContent = 'Nick não autorizado ou inválido.';
+            // Novo: Busca o estudante na lista
+            const student = students.find(s => s.nick === nick);
+            if (student && student.canApply) {
+                currentUser = nick;
+                localStorage.setItem('currentUser', currentUser);
+                loginOverlay.classList.remove('active');
+                appContainer.classList.remove('hidden');
+                loginError.textContent = '';
+                renderApp();
+            } else {
+                loginError.textContent = 'Nick não autorizado ou inválido.';
+            }
         }
     }
 
@@ -96,6 +103,13 @@ document.addEventListener('DOMContentLoaded', () => {
             currentUserNickElement.textContent = currentUser;
             const isAdmin = currentUser === ADMIN_NICK;
             adminTabButton.classList.toggle('hidden', !isAdmin);
+
+            // Novo: Lógica para mostrar/esconder o botão de formulário
+            const student = students.find(s => s.nick === currentUser);
+            const canApply = isAdmin || (student && student.canApply);
+            openFormButton.classList.toggle('hidden', !canApply);
+            restrictedNotice.classList.toggle('hidden', canApply);
+
             updateDashboard();
             renderHires();
             renderRanking();
@@ -110,7 +124,6 @@ document.addEventListener('DOMContentLoaded', () => {
         faltamCount.textContent = faltam;
     }
 
-    // Função modificada para adicionar a contagem aos cards e colunas
     function renderHires() {
         pendingCardsContainer.innerHTML = '';
         approvedCardsContainer.innerHTML = '';
@@ -119,7 +132,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let approvedCount = 0;
         let deniedCount = 0;
 
-        // Filtra e renderiza os cards, atribuindo um número de ordem
         hires.forEach(hire => {
             let cardNumber = null;
             if (hire.status === 'approved') {
@@ -140,13 +152,19 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
-        // Atualiza o título das colunas com a contagem total
-        approvedColumn.querySelector('h2').innerHTML = `<span class="status-dot approved"></span>Contratados Aprovados <span class="count">(${approvedCount})</span>`;
-        deniedColumn.querySelector('h2').innerHTML = `<span class="status-dot denied"></span>Submissões Recusadas <span class="count">(${deniedCount})</span>`;
-        pendingColumn.querySelector('h2').innerHTML = `<span class="status-dot pending"></span>Análise Pendente`;
+        const pendingTitleH2 = pendingColumn.querySelector('h2');
+        pendingTitleH2.className = 'centered';
+        pendingTitleH2.innerHTML = `<span class="status-dot pending"></span>Análise Pendente`;
+        
+        const approvedTitleH2 = approvedColumn.querySelector('h2');
+        approvedTitleH2.className = 'spaced';
+        approvedTitleH2.innerHTML = `<span class="status-dot approved"></span>Contratados Aprovados <span class="count">(${approvedCount})</span>`;
+        
+        const deniedTitleH2 = deniedColumn.querySelector('h2');
+        deniedTitleH2.className = 'spaced';
+        deniedTitleH2.innerHTML = `<span class="status-dot denied"></span>Submissões Recusadas <span class="count">(${deniedCount})</span>`;
     }
 
-    // Função modificada para receber a numeração do card
     function createHireCard(hire, cardNumber) {
         const card = document.createElement('div');
         card.className = `hire-card ${hire.status}`;
@@ -225,28 +243,38 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Função modificada para renderizar o switch de permissão
     function renderAdminPanel() {
         if (currentUser === ADMIN_NICK) {
             studentList.innerHTML = '';
             students.forEach(student => {
                 const li = document.createElement('li');
                 li.innerHTML = `
-                    <span class="student-name">${student}</span>
-                    <button class="remove-student-btn" data-nick="${student}">Remover</button>
+                    <span class="student-name">${student.nick}</span>
+                    <div class="permission-control">
+                        <label>
+                            <input type="checkbox" data-nick="${student.nick}" ${student.canApply ? 'checked' : ''}>
+                            <span class="slider ${student.canApply ? 'active' : ''}"></span>
+                        </label>
+                        <button class="remove-student-btn" data-nick="${student.nick}">Remover</button>
+                    </div>
                 `;
                 studentList.appendChild(li);
             });
         }
     }
 
+    // Função modificada para lidar com a nova estrutura de dados
     function handleAdminPanel(event) {
         event.preventDefault();
         const target = event.target;
 
         if (target.id === 'add-student-form') {
             const newNick = newStudentNickInput.value.trim();
-            if (newNick && !students.includes(newNick)) {
-                students.push(newNick);
+            const existingStudent = students.find(s => s.nick === newNick);
+            if (newNick && !existingStudent) {
+                // Novo: Adiciona estudante como objeto, com permissão desativada
+                students.push({ nick: newNick, canApply: false });
                 localStorage.setItem('students', JSON.stringify(students));
                 renderAdminPanel();
                 newStudentNickInput.value = '';
@@ -255,10 +283,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const nickToRemove = target.dataset.nick;
             if (nickToRemove !== ADMIN_NICK) {
                 showConfirmationModal(`Tem certeza que deseja remover ${nickToRemove}?`, () => {
-                    students = students.filter(s => s !== nickToRemove);
+                    students = students.filter(s => s.nick !== nickToRemove);
                     localStorage.setItem('students', JSON.stringify(students));
                     renderAdminPanel();
                 });
+            }
+        } else if (target.type === 'checkbox') {
+            // Novo: Lida com a mudança no switch de permissão
+            const nickToToggle = target.dataset.nick;
+            const student = students.find(s => s.nick === nickToToggle);
+            if (student) {
+                student.canApply = target.checked;
+                localStorage.setItem('students', JSON.stringify(students));
+                renderAdminPanel(); // Rerenderiza para atualizar o estado do slider
             }
         }
     }
@@ -338,11 +375,13 @@ document.addEventListener('DOMContentLoaded', () => {
     pendingCardsContainer.addEventListener('click', handleCardAction);
     approvedCardsContainer.addEventListener('click', handleCardAction);
     deniedCardsContainer.addEventListener('click', handleCardAction);
-    addStudentForm.addEventListener('submit', handleAdminPanel);
+    
+    if(addStudentForm) {
+        addStudentForm.addEventListener('submit', handleAdminPanel);
+    }
     if(studentList) {
         studentList.addEventListener('click', handleAdminPanel);
     }
     
     loginNickInput.addEventListener('input', toggleAdminPasswordInput);
 });
-
