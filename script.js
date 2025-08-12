@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- CONFIGURAÇÃO E DADOS ---
     const META_CONTRATACAO = 60;
-    const MIN_CARDS_VISIBLE = 5; // Limite para minimizar os cards
+    const MINIMIZE_THRESHOLD = 10; // O novo limite para minimizar TODOS os cards
 
     // IMPORTANTE: Defina aqui o Nick do Administrador e a SENHA DE ACESSO.
     const ADMIN_NICK = 'J2Z#013'; 
@@ -91,14 +91,17 @@ document.addEventListener('DOMContentLoaded', () => {
             container.innerHTML = `<p class="empty-state" style="text-align: center; color: #555; font-size: 0.9em;">Nenhuma submissão aqui.</p>`;
             return;
         }
+        
+        // CORREÇÃO: Adicionamos esta variável para verificar o limite de cards
+        const shouldMinimizeAll = list.length >= MINIMIZE_THRESHOLD;
 
         list.forEach((hire, index) => {
             const card = document.createElement('div');
             card.className = `hire-card ${hire.status}`;
             card.dataset.id = hire.id;
             
-            // Adiciona a classe 'minimized' a partir do 5º card
-            if (index >= MIN_CARDS_VISIBLE) {
+            // CORREÇÃO: Adiciona a classe 'minimized' a todos os cards se o limite for atingido
+            if (shouldMinimizeAll) {
                 card.classList.add('minimized');
             }
 
@@ -225,14 +228,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!card) return;
             
             if (target.closest('.card-actions')) {
-                // Se o clique foi em um botão de ação, processa a ação.
                 handleBoardClick(e);
             } else {
-                // Se o clique foi no card em si, alterna o estado de minimização.
-                // Verifica se o card já está minimizado.
                 const isMinimized = card.classList.contains('minimized');
                 
-                // Remove a classe 'minimized' de todos os cards na mesma coluna
+                // Minimiza todos os cards na coluna
                 card.closest('.cards-container').querySelectorAll('.hire-card').forEach(c => {
                     c.classList.add('minimized');
                 });
@@ -391,9 +391,6 @@ document.addEventListener('DOMContentLoaded', () => {
         addHireForm.reset();
     });
     addHireForm.addEventListener('submit', handleFormSubmit);
-
-    // O event listener para os cards agora lida com a minimização e as ações
-    // dentro de um único bloco de código.
     
     navButtons.forEach(btn => {
         btn.addEventListener('click', handleTabChange);
