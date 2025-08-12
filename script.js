@@ -9,7 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Carrega dados do localStorage ou inicia arrays vazios.
     let hires = JSON.parse(localStorage.getItem('hiresData')) || [];
-    let currentUser = localStorage.getItem('currentUser') || null;
+    // NOVO: Verifica se o valor é a string "null" e o converte para o valor nulo real.
+    let currentUser = localStorage.getItem('currentUser') === 'null' ? null : localStorage.getItem('currentUser');
     let allowedStudents = JSON.parse(localStorage.getItem('allowedStudents')) || [ADMIN_NICK, 'AlunoAprovador#1234', 'LiderEquipe#7777'];
 
     // --- ELEMENTOS DO DOM (HTML) ---
@@ -192,7 +193,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleLogout() {
         currentUser = null;
         document.body.classList.remove('admin-logged-in');
-        saveData();
+        // NOVO: Remove o item do localStorage em vez de apenas salvar como "null"
+        localStorage.removeItem('currentUser');
         loginOverlay.classList.add('active');
         appContainer.classList.add('hidden');
     }
@@ -274,7 +276,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- INICIALIZAÇÃO E EVENT LISTENERS ---
     
-    // NOVO: Lógica de inicialização corrigida
     if (currentUser) {
         loginOverlay.classList.remove('active');
         appContainer.classList.remove('hidden');
