@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `).join('');
     }
 
-    // Corrigido: Renderiza o label para o toggle switch corretamente
+    // Renderiza o label para o toggle switch corretamente
     function renderAdminPanel() {
         if (!studentList) return;
         studentList.innerHTML = allowedStudents.map(student => `
@@ -185,12 +185,18 @@ document.addEventListener('DOMContentLoaded', () => {
         confirmationOverlay.classList.remove('active');
     });
     
+    // CORRIGIDO: Evento para gerenciar a permissão de aprovação de forma mais robusta
     if (studentList) {
-        studentList.addEventListener('change', (e) => {
+        studentList.addEventListener('click', (e) => {
             const target = e.target;
-            if (target.type === 'checkbox') {
-                const studentNick = target.dataset.nick;
-                if (target.checked) {
+            const checkbox = target.closest('li')?.querySelector('input[type="checkbox"]');
+            
+            // Se o clique foi no checkbox ou no slider associado
+            if (checkbox && (target === checkbox || target.classList.contains('slider'))) {
+                const studentNick = checkbox.dataset.nick;
+                const isChecked = checkbox.checked;
+
+                if (isChecked) {
                     if (!allowedApprovers.includes(studentNick)) {
                         allowedApprovers.push(studentNick);
                     }
@@ -360,7 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     addStudentForm.addEventListener('submit', handleAdminPanel);
     if(studentList) {
-      studentList.addEventListener('click', handleAdminPanel);
+        studentList.addEventListener('click', handleAdminPanel);
     }
 
     loginNickInput.addEventListener('input', togglePasswordInput);
