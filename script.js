@@ -53,6 +53,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let hires = JSON.parse(localStorage.getItem('hires')) || [];
     let students = JSON.parse(localStorage.getItem('students')) || [];
 
+    // NOVO: Filtra a lista para remover entradas corrompidas ou undefined.
+    // Isso resolve o problema de 'undefined' que estava aparecendo.
+    students = students.filter(s => s && typeof s === 'object' && s.nick);
+
     // FUNÇÕES
     function handleLogin(event) {
         event.preventDefault();
@@ -240,13 +244,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Função modificada para renderizar o switch de permissão
     function renderAdminPanel() {
         if (currentUser === ADMIN_NICK) {
             studentList.innerHTML = '';
             students.forEach(student => {
                 const li = document.createElement('li');
-                // Alterado: removida a classe 'active' do slider, o CSS fará isso
                 li.innerHTML = `
                     <span class="student-name">${student.nick}</span>
                     <div class="permission-control">
@@ -262,7 +264,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Função modificada para lidar com a nova estrutura de dados
     function handleAdminPanel(event) {
         event.preventDefault();
         const target = event.target;
