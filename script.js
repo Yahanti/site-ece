@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
         faltamCount.textContent = faltam;
     }
 
-    // Função modificada para corrigir o alinhamento do título "Análise Pendente"
+    // Função modificada para corrigir o alinhamento
     function renderHires() {
         pendingCardsContainer.innerHTML = '';
         approvedCardsContainer.innerHTML = '';
@@ -139,15 +139,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
-        // Atualiza o título das colunas com a contagem total
-        // Título Aprovados e Recusados mantêm a contagem alinhada à direita
-        approvedColumn.querySelector('h2').innerHTML = `<span class="status-dot approved"></span>Contratados Aprovados <span class="count">(${approvedCount})</span>`;
-        deniedColumn.querySelector('h2').innerHTML = `<span class="status-dot denied"></span>Submissões Recusadas <span class="count">(${deniedCount})</span>`;
+        // Títulos das colunas com classes para controlar o alinhamento
+        const pendingTitleH2 = pendingColumn.querySelector('h2');
+        pendingTitleH2.className = 'centered';
+        pendingTitleH2.innerHTML = `<span class="status-dot pending"></span>Análise Pendente`;
         
-        // Título Pendente tem seu próprio estilo de alinhamento
-        pendingColumn.querySelector('h2').style.justifyContent = 'center'; // Centraliza o conteúdo
-        pendingColumn.querySelector('h2').style.gap = '0.5rem';
-        pendingColumn.querySelector('h2').innerHTML = `<span class="status-dot pending"></span>Análise Pendente`;
+        const approvedTitleH2 = approvedColumn.querySelector('h2');
+        approvedTitleH2.className = 'spaced';
+        approvedTitleH2.innerHTML = `<span class="status-dot approved"></span>Contratados Aprovados <span class="count">(${approvedCount})</span>`;
+        
+        const deniedTitleH2 = deniedColumn.querySelector('h2');
+        deniedTitleH2.className = 'spaced';
+        deniedTitleH2.innerHTML = `<span class="status-dot denied"></span>Submissões Recusadas <span class="count">(${deniedCount})</span>`;
     }
 
     function createHireCard(hire, cardNumber) {
