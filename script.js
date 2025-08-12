@@ -1,379 +1,319 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // VARIÁVEIS DE CONFIGURAÇÃO
+    const ADMIN_NICK = 'J2Z#1337'; // Defina o nick do admin aqui
 
-    // --- CONFIGURAÇÃO E DADOS ---
-    const META_CONTRATACAO = 60;
-    const MINIMIZE_THRESHOLD = 5; // O novo limite para minimizar TODOS os cards
-
-    // IMPORTANTE: Defina aqui o Nick do Administrador e a SENHA DE ACESSO.
-    const ADMIN_NICK = 'J2Z#013'; 
-    const ADMIN_PASSWORD = 'supercap'; // Altere esta senha para algo seguro!
-    
-    // Carrega dados do localStorage ou inicia arrays vazios.
-    let hires = JSON.parse(localStorage.getItem('hiresData')) || [];
-    let currentUser = localStorage.getItem('currentUser') === 'null' ? null : localStorage.getItem('currentUser');
-    let allowedStudents = JSON.parse(localStorage.getItem('allowedStudents')) || [ADMIN_NICK, 'AlunoAprovador#1234', 'LiderEquipe#7777'];
-    let allowedApprovers = JSON.parse(localStorage.getItem('allowedApprovers')) || [ADMIN_NICK];
-
-    // --- ELEMENTOS DO DOM (HTML) ---
+    // SELETORES DE ELEMENTOS
     const loginOverlay = document.getElementById('login-overlay');
-    const loginForm = document.getElementById('login-form');
     const loginNickInput = document.getElementById('login-nick');
     const loginPasswordInput = document.getElementById('login-password');
+    const loginForm = document.getElementById('login-form');
     const loginError = document.getElementById('login-error');
+    
     const appContainer = document.getElementById('app-container');
-    const currentUserNickEl = document.getElementById('current-user-nick');
+    const currentUserNickElement = document.getElementById('current-user-nick');
     const logoutButton = document.getElementById('logout-button');
-    const countContratadosEl = document.getElementById('contratados-count');
-    const countFaltamEl = document.getElementById('faltam-count');
+
+    const navButtons = document.querySelectorAll('.nav-button');
+    const adminTabButton = document.querySelector('[data-tab="admin-tab"]');
+
+    const contratadosCount = document.getElementById('contratados-count');
+    const faltamCount = document.getElementById('faltam-count');
+
+    const pendingColumn = document.getElementById('pending-column');
+    const approvedColumn = document.getElementById('approved-column');
+    const deniedColumn = document.getElementById('denied-column');
+
+    const pendingCardsContainer = document.getElementById('pending-cards');
+    const approvedCardsContainer = document.getElementById('approved-cards');
+    const deniedCardsContainer = document.getElementById('denied-cards');
+
     const openFormButton = document.getElementById('open-form-button');
     const formModalOverlay = document.getElementById('form-modal-overlay');
     const addHireForm = document.getElementById('add-hire-form');
     const cancelFormButton = document.getElementById('cancel-form-button');
-    const pendingCardsContainer = document.getElementById('pending-cards');
-    const approvedCardsContainer = document.getElementById('approved-cards');
-    const deniedCardsContainer = document.getElementById('denied-cards');
-    const hiresBoard = document.getElementById('hires-board');
-    const navButtons = document.querySelectorAll('#main-nav .nav-button');
-    const tabContents = document.querySelectorAll('.tab-content');
-    const rankingTableBody = document.querySelector('#ranking-list tbody');
-    const adminTabButton = document.querySelector('[data-tab="admin-tab"]');
-    const addStudentForm = document.getElementById('add-student-form');
-    const newStudentInput = document.getElementById('new-student-nick');
-    const studentList = document.getElementById('student-list');
-    
-    // Elementos do Modal de Confirmação
+    const contratadoNickInput = document.getElementById('contratado-nick');
+    const printUrlInput = document.getElementById('print-url');
+    const postUrlInput = document.getElementById('post-url');
+
+    const rankingListBody = document.querySelector('#ranking-list tbody');
+
     const confirmationOverlay = document.getElementById('confirmation-overlay');
     const confirmationMessage = document.getElementById('confirmation-message');
-    const confirmActionBtn = document.getElementById('confirm-action-btn');
-    const cancelConfirmationBtn = document.getElementById('cancel-confirmation-btn');
-
-    // --- FUNÇÕES DE LÓGICA ---
-
-    function saveData() {
-        localStorage.setItem('hiresData', JSON.stringify(hires));
-        localStorage.setItem('currentUser', currentUser);
-        localStorage.setItem('allowedStudents', JSON.stringify(allowedStudents));
-        localStorage.setItem('allowedApprovers', JSON.stringify(allowedApprovers));
-    }
-
-    function renderApp() {
-        if (!currentUser) return;
-
-        currentUserNickEl.textContent = currentUser;
-
-        const isAdmin = currentUser === ADMIN_NICK;
-        const isApprover = allowedApprovers.includes(currentUser);
-        document.body.classList.toggle('admin-logged-in', isAdmin);
-        adminTabButton.classList.toggle('hidden', !isAdmin);
-
-        const pending = hires.filter(h => h.status === 'pending');
-        const approved = hires.filter(h => h.status === 'approved');
-        const denied = hires.filter(h => h.status === 'denied');
-
-        const approvedCount = approved.length;
-        countContratadosEl.textContent = approvedCount;
-        countFaltamEl.textContent = Math.max(0, META_CONTRATACAO - approvedCount);
-        
-        renderCards(pending, pendingCardsContainer, isApprover);
-        renderCards(approved, approvedCardsContainer, isApprover);
-        renderCards(denied, deniedCardsContainer, isApprover);
-        
-        renderRanking();
-        
-        if(isAdmin) {
-            renderAdminPanel();
-        }
-    }
-
-    function renderCards(list, container, isApprover) {
-        container.innerHTML = '';
-        if (list.length === 0) {
-            container.innerHTML = `<p class="empty-state" style="text-align: center; color: #555; font-size: 0.9em;">Nenhuma submissão aqui.</p>`;
-            return;
-        }
-        
-        // CORREÇÃO: Adicionamos esta variável para verificar o limite de cards
-        const shouldMinimizeAll = list.length >= MINIMIZE_THRESHOLD;
-
-        list.forEach((hire, index) => {
-            const card = document.createElement('div');
-            card.className = `hire-card ${hire.status}`;
-            card.dataset.id = hire.id;
-            
-            // CORREÇÃO: Adiciona a classe 'minimized' a todos os cards se o limite for atingido
-            if (shouldMinimizeAll) {
-                card.classList.add('minimized');
-            }
-
-            let actionsHtml = '';
-            if (hire.status === 'pending' && isApprover) {
-                actionsHtml += `
-                    <button class="approve-btn">Aprovar</button>
-                    <button class="deny-btn">Recusar</button>
-                `;
-            }
-
-            if (currentUser === ADMIN_NICK) {
-                actionsHtml += `<button class="delete-btn">Excluir</button>`;
-            }
-
-            const fullActionsHtml = actionsHtml ? `<div class="card-actions">${actionsHtml}</div>` : '';
-
-            card.innerHTML = `
-                <h3>${hire.contratadoNick}</h3>
-                <p><strong>Print:</strong> <a href="${hire.printUrl}" target="_blank" rel="noopener noreferrer">Ver Imagem</a></p>
-                <p><strong>Postagem:</strong> <a href="${hire.postUrl}" target="_blank" rel="noopener noreferrer">Ver Link</a></p>
-                <p><small>Submetido por: ${hire.submittedBy}</small></p>
-                ${fullActionsHtml}
-            `;
-            container.appendChild(card);
-        });
-    }
-
-    function renderRanking() {
-        if (!rankingTableBody) return;
-
-        const approvedHires = hires.filter(h => h.status === 'approved');
-        
-        const rankingMap = new Map();
-        allowedStudents.forEach(student => rankingMap.set(student, 0));
-        
-        approvedHires.forEach(hire => {
-            const currentCount = rankingMap.get(hire.submittedBy) || 0;
-            rankingMap.set(hire.submittedBy, currentCount + 1);
-        });
-        
-        const rankingList = Array.from(rankingMap.entries())
-            .map(([nick, count]) => ({ nick, count }));
-
-        rankingList.sort((a, b) => b.count - a.count);
-
-        rankingTableBody.innerHTML = rankingList.map((item, index) => `
-            <tr>
-                <td data-label="Posição">${index + 1}</td>
-                <td data-label="Nick">${item.nick}</td>
-                <td data-label="Contratações">${item.count}</td>
-            </tr>
-        `).join('');
-    }
-
-    function renderAdminPanel() {
-        if (!studentList) return;
-        studentList.innerHTML = allowedStudents.map(student => `
-            <li>
-                <span class="student-name">${student}</span>
-                <div class="permission-control">
-                    ${student !== ADMIN_NICK ? `
-                        <label>
-                            <input type="checkbox" data-nick="${student}" ${allowedApprovers.includes(student) ? 'checked' : ''}>
-                            <span class="slider ${allowedApprovers.includes(student) ? 'active' : ''}"></span>
-                        </label>
-                        <button class="remove-student-btn" data-nick="${student}">Remover</button>
-                    ` : ''}
-                </div>
-            </li>
-        `).join('');
-    }
+    const confirmActionButton = document.getElementById('confirm-action-btn');
+    const cancelConfirmationButton = document.getElementById('cancel-confirmation-btn');
     
-    function showConfirmationModal(message, onConfirm) {
-        confirmationMessage.textContent = message;
-        confirmationOverlay.classList.add('active');
-        
-        confirmActionBtn.onclick = null; 
-        
-        confirmActionBtn.onclick = () => {
-            confirmationOverlay.classList.remove('active');
-            onConfirm();
-        };
-    }
+    const addStudentForm = document.getElementById('add-student-form');
+    const newStudentNickInput = document.getElementById('new-student-nick');
+    const studentList = document.getElementById('student-list');
 
-    // --- MANIPULADORES DE EVENTOS (HANDLERS) ---
-    
-    cancelConfirmationBtn.addEventListener('click', () => {
-        confirmationOverlay.classList.remove('active');
-    });
-    
-    if (studentList) {
-        studentList.addEventListener('click', (e) => {
-            const target = e.target;
-            const checkbox = target.closest('li')?.querySelector('input[type="checkbox"]');
-            
-            if (checkbox) {
-                const studentNick = checkbox.dataset.nick;
-                const slider = checkbox.nextElementSibling;
+    // VARIÁVEIS DE ESTADO
+    let currentUser = localStorage.getItem('currentUser');
+    let hires = JSON.parse(localStorage.getItem('hires')) || [];
+    let students = JSON.parse(localStorage.getItem('students')) || [];
 
-                checkbox.checked = !checkbox.checked;
-
-                if (checkbox.checked) {
-                    slider.classList.add('active');
-                    if (!allowedApprovers.includes(studentNick)) {
-                        allowedApprovers.push(studentNick);
-                    }
-                } else {
-                    slider.classList.remove('active');
-                    allowedApprovers = allowedApprovers.filter(nick => nick !== studentNick);
-                }
-
-                saveData();
-                renderApp();
-            }
-        });
-    }
-
-    if (hiresBoard) {
-        hiresBoard.addEventListener('click', (e) => {
-            const target = e.target;
-            const card = target.closest('.hire-card');
-            
-            if (!card) return;
-            
-            if (target.closest('.card-actions')) {
-                handleBoardClick(e);
-            } else {
-                const isMinimized = card.classList.contains('minimized');
-                
-                // Minimiza todos os cards na coluna
-                card.closest('.cards-container').querySelectorAll('.hire-card').forEach(c => {
-                    c.classList.add('minimized');
-                });
-                
-                // Se o card original estava minimizado, remove a classe dele para expandir.
-                if (isMinimized) {
-                    card.classList.remove('minimized');
-                }
-            }
-        });
-    }
-    
-    function togglePasswordInput() {
-        const isCurrentUserAdmin = loginNickInput.value.trim() === ADMIN_NICK;
-        loginPasswordInput.classList.toggle('hidden', !isCurrentUserAdmin);
-    }
-    
-    function handleLogin(e) {
-        e.preventDefault();
+    // FUNÇÕES
+    function handleLogin(event) {
+        event.preventDefault();
         const nick = loginNickInput.value.trim();
         const password = loginPasswordInput.value.trim();
+        const isAdmin = nick === ADMIN_NICK;
 
-        if (allowedStudents.includes(nick)) {
-            if (nick === ADMIN_NICK) {
-                if (password === ADMIN_PASSWORD) {
-                    currentUser = nick;
-                    loginError.textContent = '';
-                    loginNickInput.value = '';
-                    loginPasswordInput.value = '';
-                    saveData();
-                    loginOverlay.classList.remove('active');
-                    appContainer.classList.remove('hidden');
-                    renderApp();
-                } else {
-                    loginError.textContent = 'Senha incorreta.';
-                    loginPasswordInput.value = '';
-                }
-            } else {
+        if (isAdmin) {
+            if (password === 'senhaadmin123') { // Defina a senha do admin aqui
                 currentUser = nick;
-                loginError.textContent = '';
-                loginNickInput.value = '';
-                loginPasswordInput.value = '';
-                saveData();
+                localStorage.setItem('currentUser', currentUser);
                 loginOverlay.classList.remove('active');
                 appContainer.classList.remove('hidden');
+                loginError.textContent = '';
                 renderApp();
+            } else {
+                loginError.textContent = 'Senha de admin incorreta.';
             }
+        } else if (students.includes(nick)) {
+            currentUser = nick;
+            localStorage.setItem('currentUser', currentUser);
+            loginOverlay.classList.remove('active');
+            appContainer.classList.remove('hidden');
+            loginError.textContent = '';
+            renderApp();
         } else {
-            loginError.textContent = 'Acesso negado. Nick ou Numeração inválidos.';
+            loginError.textContent = 'Nick não autorizado ou inválido.';
         }
     }
 
     function handleLogout() {
-        currentUser = null;
-        document.body.classList.remove('admin-logged-in');
         localStorage.removeItem('currentUser');
+        currentUser = null;
         loginOverlay.classList.add('active');
         appContainer.classList.add('hidden');
-    }
-    
-    function handleFormSubmit(e) {
-        e.preventDefault();
-        hires.push({
-            id: Date.now(),
-            submittedBy: currentUser,
-            contratadoNick: document.getElementById('contratado-nick').value.trim(),
-            printUrl: document.getElementById('print-url').value.trim(),
-            postUrl: document.getElementById('post-url').value.trim(),
-            status: 'pending'
-        });
-        addHireForm.reset();
-        formModalOverlay.classList.remove('active');
-        saveData();
-        renderApp();
+        loginNickInput.value = '';
+        loginPasswordInput.value = '';
+        loginError.textContent = '';
     }
 
-    function handleBoardClick(e) {
-        const target = e.target;
-        const card = target.closest('.hire-card');
-        if (!card) return;
-
-        const hireId = parseInt(card.dataset.id, 10);
-        
-        if (target.classList.contains('approve-btn')) {
-            const hire = hires.find(h => h.id === hireId);
-            if (hire) hire.status = 'approved';
-            saveData();
-            renderApp();
-        } else if (target.classList.contains('deny-btn')) {
-            const hire = hires.find(h => h.id === hireId);
-            if (hire) hire.status = 'denied';
-            saveData();
-            renderApp();
-        } else if (target.classList.contains('delete-btn')) {
-            if (currentUser === ADMIN_NICK) {
-                showConfirmationModal('Tem certeza que deseja excluir esta submissão permanentemente?', () => {
-                    hires = hires.filter(h => h.id !== hireId);
-                    saveData();
-                    renderApp();
-                });
-            }
+    function renderApp() {
+        if (currentUser) {
+            currentUserNickElement.textContent = currentUser;
+            const isAdmin = currentUser === ADMIN_NICK;
+            adminTabButton.classList.toggle('hidden', !isAdmin);
+            updateDashboard();
+            renderHires();
+            renderRanking();
+            renderAdminPanel();
         }
     }
-    
-    function handleTabChange(e) {
-        const targetTabId = e.target.dataset.tab;
-        
-        navButtons.forEach(btn => btn.classList.remove('active'));
-        tabContents.forEach(tab => tab.classList.add('hidden'));
 
-        e.target.classList.add('active');
-        document.getElementById(targetTabId).classList.remove('hidden');
+    function updateDashboard() {
+        const approvedCount = hires.filter(h => h.status === 'approved').length;
+        contratadosCount.textContent = approvedCount;
+        const faltam = 60 - approvedCount;
+        faltamCount.textContent = faltam;
     }
 
-    function handleAdminPanel(e) {
-        e.preventDefault();
-        const target = e.target;
+    // Função modificada para adicionar a contagem aos cards e colunas
+    function renderHires() {
+        pendingCardsContainer.innerHTML = '';
+        approvedCardsContainer.innerHTML = '';
+        deniedCardsContainer.innerHTML = '';
 
-        if (target.id === 'add-student-form') {
-            const newNick = newStudentInput.value.trim();
-            if (newNick && !allowedStudents.includes(newNick)) {
-                allowedStudents.push(newNick);
-                newStudentInput.value = '';
-                saveData();
-                renderAdminPanel();
+        let approvedCount = 0;
+        let deniedCount = 0;
+
+        // Filtra e renderiza os cards, atribuindo um número de ordem
+        hires.forEach(hire => {
+            let cardNumber = null;
+            if (hire.status === 'approved') {
+                approvedCount++;
+                cardNumber = approvedCount;
+            } else if (hire.status === 'denied') {
+                deniedCount++;
+                cardNumber = deniedCount;
             }
-        } else if (target.classList.contains('remove-student-btn')) {
-            const nickToRemove = target.dataset.nick;
-            
-            showConfirmationModal(`Tem certeza que deseja remover ${nickToRemove}?`, () => {
-                allowedStudents = allowedStudents.filter(nick => nick !== nickToRemove);
-                allowedApprovers = allowedApprovers.filter(nick => nick !== nickToRemove);
-                saveData();
-                renderAdminPanel();
-                renderApp(); 
+
+            const hireCard = createHireCard(hire, cardNumber);
+            if (hire.status === 'pending') {
+                pendingCardsContainer.appendChild(hireCard);
+            } else if (hire.status === 'approved') {
+                approvedCardsContainer.appendChild(hireCard);
+            } else {
+                deniedCardsContainer.appendChild(hireCard);
+            }
+        });
+        
+        // Atualiza o título das colunas com a contagem total
+        approvedColumn.querySelector('h2').innerHTML = `<span class="status-dot approved"></span>Contratados Aprovados <span class="count">(${approvedCount})</span>`;
+        deniedColumn.querySelector('h2').innerHTML = `<span class="status-dot denied"></span>Submissões Recusadas <span class="count">(${deniedCount})</span>`;
+        pendingColumn.querySelector('h2').innerHTML = `<span class="status-dot pending"></span>Análise Pendente`;
+    }
+
+    // Função modificada para receber a numeração do card
+    function createHireCard(hire, cardNumber) {
+        const card = document.createElement('div');
+        card.className = `hire-card ${hire.status}`;
+        card.dataset.id = hire.id;
+        card.innerHTML = `
+            ${cardNumber ? `<span class="card-number">#${cardNumber}</span>` : ''}
+            <h3>${hire.nick}</h3>
+            <p><strong>Submetido por:</strong> ${hire.submittedBy}</p>
+            <p><strong>Print:</strong> <a href="${hire.printUrl}" target="_blank">Visualizar</a></p>
+            <p><strong>Post:</strong> <a href="${hire.postUrl}" target="_blank">Ver no Fórum</a></p>
+            <div class="card-actions">
+                ${currentUser === ADMIN_NICK ? `
+                    ${hire.status === 'pending' ? `<button class="approve-btn">Aprovar</button>` : ''}
+                    ${hire.status === 'pending' ? `<button class="deny-btn">Recusar</button>` : ''}
+                    <button class="delete-btn">Excluir</button>
+                ` : ''}
+            </div>
+        `;
+        return card;
+    }
+    
+    function handleCardAction(event) {
+        const card = event.target.closest('.hire-card');
+        const hireId = card.dataset.id;
+        const action = event.target.textContent;
+
+        if (event.target.classList.contains('approve-btn')) {
+            showConfirmationModal('Tem certeza que deseja aprovar esta contratação?', () => {
+                const hireIndex = hires.findIndex(h => h.id == hireId);
+                if (hireIndex !== -1) {
+                    hires[hireIndex].status = 'approved';
+                    localStorage.setItem('hires', JSON.stringify(hires));
+                    renderApp();
+                }
+            });
+        } else if (event.target.classList.contains('deny-btn')) {
+            showConfirmationModal('Tem certeza que deseja recusar esta contratação?', () => {
+                const hireIndex = hires.findIndex(h => h.id == hireId);
+                if (hireIndex !== -1) {
+                    hires[hireIndex].status = 'denied';
+                    localStorage.setItem('hires', JSON.stringify(hires));
+                    renderApp();
+                }
+            });
+        } else if (event.target.classList.contains('delete-btn')) {
+            showConfirmationModal('Tem certeza que deseja excluir esta contratação? Esta ação é irreversível.', () => {
+                const hireIndex = hires.findIndex(h => h.id == hireId);
+                if (hireIndex !== -1) {
+                    hires.splice(hireIndex, 1);
+                    localStorage.setItem('hires', JSON.stringify(hires));
+                    renderApp();
+                }
             });
         }
     }
 
-    // --- INICIALIZAÇÃO E EVENT LISTENERS ---
+    function renderRanking() {
+        rankingListBody.innerHTML = '';
+        const approvedHires = hires.filter(h => h.status === 'approved');
+        const ranking = {};
+
+        approvedHires.forEach(hire => {
+            ranking[hire.submittedBy] = (ranking[hire.submittedBy] || 0) + 1;
+        });
+
+        const sortedRanking = Object.entries(ranking).sort((a, b) => b[1] - a[1]);
+
+        sortedRanking.forEach(([nick, count], index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td data-label="Posição">${index + 1}</td>
+                <td data-label="Nick">${nick}</td>
+                <td data-label="Contratações">${count}</td>
+            `;
+            rankingListBody.appendChild(row);
+        });
+    }
+
+    function renderAdminPanel() {
+        if (currentUser === ADMIN_NICK) {
+            studentList.innerHTML = '';
+            students.forEach(student => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span class="student-name">${student}</span>
+                    <button class="remove-student-btn" data-nick="${student}">Remover</button>
+                `;
+                studentList.appendChild(li);
+            });
+        }
+    }
+
+    function handleAdminPanel(event) {
+        event.preventDefault();
+        const target = event.target;
+
+        if (target.id === 'add-student-form') {
+            const newNick = newStudentNickInput.value.trim();
+            if (newNick && !students.includes(newNick)) {
+                students.push(newNick);
+                localStorage.setItem('students', JSON.stringify(students));
+                renderAdminPanel();
+                newStudentNickInput.value = '';
+            }
+        } else if (target.classList.contains('remove-student-btn')) {
+            const nickToRemove = target.dataset.nick;
+            if (nickToRemove !== ADMIN_NICK) {
+                showConfirmationModal(`Tem certeza que deseja remover ${nickToRemove}?`, () => {
+                    students = students.filter(s => s !== nickToRemove);
+                    localStorage.setItem('students', JSON.stringify(students));
+                    renderAdminPanel();
+                });
+            }
+        }
+    }
+
+    function handleFormSubmit(event) {
+        event.preventDefault();
+        const newHire = {
+            id: Date.now(),
+            nick: contratadoNickInput.value,
+            printUrl: printUrlInput.value,
+            postUrl: postUrlInput.value,
+            submittedBy: currentUser,
+            status: 'pending'
+        };
+        hires.push(newHire);
+        localStorage.setItem('hires', JSON.stringify(hires));
+        formModalOverlay.classList.remove('active');
+        addHireForm.reset();
+        renderApp();
+    }
+
+    function handleTabChange(event) {
+        const activeTab = document.querySelector('.tab-content.active');
+        const activeNav = document.querySelector('.nav-button.active');
+        activeTab.classList.remove('active');
+        activeTab.classList.add('hidden');
+        activeNav.classList.remove('active');
+
+        const newTabId = event.target.dataset.tab;
+        const newTab = document.getElementById(newTabId);
+        newTab.classList.remove('hidden');
+        newTab.classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    function showConfirmationModal(message, callback) {
+        confirmationMessage.textContent = message;
+        confirmationOverlay.classList.add('active');
+        
+        confirmActionButton.onclick = () => {
+            callback();
+            confirmationOverlay.classList.remove('active');
+        };
+
+        cancelConfirmationButton.onclick = () => {
+            confirmationOverlay.classList.remove('active');
+        };
+    }
     
+    function toggleAdminPasswordInput() {
+        const isCurrentUserAdmin = loginNickInput.value.trim() === ADMIN_NICK;
+        loginPasswordInput.classList.toggle('hidden', !isCurrentUserAdmin);
+    }
+    
+    // INICIALIZAÇÃO
     if (currentUser) {
         loginOverlay.classList.remove('active');
         appContainer.classList.remove('hidden');
@@ -382,7 +322,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loginOverlay.classList.add('active');
         appContainer.classList.add('hidden');
     }
-
+    
+    // EVENT LISTENERS
     loginForm.addEventListener('submit', handleLogin);
     logoutButton.addEventListener('click', handleLogout);
     openFormButton.addEventListener('click', () => formModalOverlay.classList.add('active'));
@@ -391,16 +332,16 @@ document.addEventListener('DOMContentLoaded', () => {
         addHireForm.reset();
     });
     addHireForm.addEventListener('submit', handleFormSubmit);
-    
     navButtons.forEach(btn => {
         btn.addEventListener('click', handleTabChange);
     });
-
+    pendingCardsContainer.addEventListener('click', handleCardAction);
+    approvedCardsContainer.addEventListener('click', handleCardAction);
+    deniedCardsContainer.addEventListener('click', handleCardAction);
     addStudentForm.addEventListener('submit', handleAdminPanel);
     if(studentList) {
         studentList.addEventListener('click', handleAdminPanel);
     }
-
-    loginNickInput.addEventListener('input', togglePasswordInput);
+    
+    loginNickInput.addEventListener('input', toggleAdminPasswordInput);
 });
-
