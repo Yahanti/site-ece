@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // VARIÁVEIS DE CONFIGURAÇÃO
-    const ADMIN_NICK = 'J2Z#013'; // Defina o nick do admin aqui
+    const ADMIN_NICK = 'J2Z#013';
 
     // SELETORES DE ELEMENTOS
     const loginOverlay = document.getElementById('login-overlay');
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelFormButton = document.getElementById('cancel-form-button');
     const contratadoNickInput = document.getElementById('contratado-nick');
     const printUrlInput = document.getElementById('print-url');
-    const postUrlInput = document = document.getElementById('post-url');
+    const postUrlInput = document.getElementById('post-url');
 
     const rankingListBody = document.querySelector('#ranking-list tbody');
 
@@ -48,12 +48,27 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const restrictedNotice = document.getElementById('restricted-notice');
 
-    // VARIÁVEIS DE ESTADO
+    // VARIÁVEIS DE ESTADO E INICIALIZAÇÃO SEGURA
     let currentUser = localStorage.getItem('currentUser');
-    let hires = JSON.parse(localStorage.getItem('hires')) || [];
-    let students = JSON.parse(localStorage.getItem('students')) || [];
+    
+    // Tentativa de carregar dados, com tratamento de erro caso o JSON seja inválido
+    let hires = [];
+    try {
+        hires = JSON.parse(localStorage.getItem('hires')) || [];
+    } catch (e) {
+        console.error('Falha ao carregar hires do localStorage:', e);
+        localStorage.removeItem('hires');
+    }
+    
+    let students = [];
+    try {
+        students = JSON.parse(localStorage.getItem('students')) || [];
+    } catch (e) {
+        console.error('Falha ao carregar students do localStorage:', e);
+        localStorage.removeItem('students');
+    }
 
-    // NOVO: Filtra a lista para remover entradas corrompidas ou undefined.
+    // Filtra a lista para remover entradas corrompidas
     students = students.filter(s => s && typeof s === 'object' && s.nick);
 
     // FUNÇÕES
@@ -186,7 +201,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return card;
     }
     
-    // NOVO: Lógica de atualização de hires mais robusta
     function handleCardAction(event) {
         const card = event.target.closest('.hire-card');
         const hireId = card.dataset.id;
@@ -254,7 +268,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // NOVO: Removida a chamada redundante para renderAdminPanel
     function handleAdminPanel(event) {
         event.preventDefault();
         const target = event.target;
@@ -265,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (newNick && !existingStudent) {
                 students.push({ nick: newNick, canApply: false });
                 localStorage.setItem('students', JSON.stringify(students));
-                renderAdminPanel(); // Mantém a renderização para mudanças estruturais
+                renderAdminPanel();
                 newStudentNickInput.value = '';
             }
         } else if (target.classList.contains('remove-student-btn')) {
@@ -274,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showConfirmationModal(`Tem certeza que deseja remover ${nickToRemove}?`, () => {
                     students = students.filter(s => s.nick !== nickToRemove);
                     localStorage.setItem('students', JSON.stringify(students));
-                    renderAdminPanel(); // Mantém a renderização para mudanças estruturais
+                    renderAdminPanel();
                 });
             }
         } else if (target.type === 'checkbox') {
@@ -283,8 +296,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (student) {
                 student.canApply = target.checked;
                 localStorage.setItem('students', JSON.stringify(students));
-                // Removida a chamada a renderAdminPanel. O CSS agora
-                // é responsável por atualizar a visualização do switch.
             }
         }
     }
