@@ -228,7 +228,7 @@ button[type="submit"]:hover, #open-form-button:hover {
 }
 .error-message { color: var(--primary-red); height: 1.2em; font-size: 0.9em; }
 
-/* NOVO: ESTILO PARA O CRÉDITO DO DESENVOLVEDOR */
+/* ESTILO CORRIGIDO PARA O CRÉDITO DO DESENVOLVEDOR */
 .developer-credit, .developer-credit-app {
     position: static;
     margin-top: 2rem;
@@ -237,6 +237,11 @@ button[type="submit"]:hover, #open-form-button:hover {
     color: var(--text-muted);
     font-size: 0.8rem;
     flex-shrink: 0;
+    
+    /* Adicionado para empilhar os parágrafos verticalmente */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* CABEÇALHO DO PAINEL */
@@ -309,7 +314,7 @@ header {
     border-left: 5px solid;
     transition: transform 0.2s ease, box-shadow 0.2s ease, height 0.3s ease, padding 0.3s ease;
     box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-    overflow: hidden; /* Adicionado para esconder o conteúdo extra */
+    overflow: hidden;
     cursor: pointer;
 }
 
