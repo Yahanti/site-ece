@@ -56,7 +56,6 @@ body {
     text-align: center;
     width: 90%; max-width: 450px;
     
-    /* Adicionado para centralizar e empilhar o conteúdo da caixa */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -234,8 +233,8 @@ button[type="submit"]:hover, #open-form-button:hover {
 }
 .error-message { color: var(--primary-red); height: 1.2em; font-size: 0.9em; }
 
-/* CORREÇÃO DO RODAPÉ: Use 'position: absolute' para fixá-lo no final da página */
-.developer-credit, .developer-credit-app {
+/* CORREÇÃO DO RODAPÉ: O rodapé da tela de login continua com 'absolute' */
+.developer-credit {
     position: absolute;
     bottom: 2rem;
     left: 50%;
@@ -246,11 +245,28 @@ button[type="submit"]:hover, #open-form-button:hover {
     color: var(--text-muted);
     font-size: 0.8rem;
     flex-shrink: 0;
-
-    /* Adicionado para empilhar o conteúdo verticalmente */
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+/* CORREÇÃO DO RODAPÉ: O rodapé da tela do aplicativo volta a ser 'static' e será empurrado pelo flexbox */
+.developer-credit-app {
+    position: static;
+    margin-top: 2rem;
+    padding: 1rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Adicionado para que o conteúdo principal ocupe o espaço e empurre o rodapé para o final */
+main {
+    flex-grow: 1;
 }
 
 /* CABEÇALHO DO PAINEL */
@@ -294,7 +310,7 @@ header {
     color: var(--primary-red);
     border-bottom-color: var(--primary-red);
 }
-.tab-content { padding: 2rem; flex-grow: 1; }
+.tab-content { padding: 2rem; }
 
 /* PAINEL DE MÉTRICAS */
 #dashboard {
@@ -309,7 +325,7 @@ header {
 
 /* PAINEL KANBAN */
 #hires-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
-.board-column h2 { display: flex; align-items: center; gap: 0.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid #444; font-family: 'Orbitron'; font-size: 1.1em; }
+.board-column h2 { display: flex; align-items: center; gap: 0.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid #444; font-family: 'Orbitron'; font-size: 1.1em;}
 .status-dot { width: 12px; height: 12px; border-radius: 50%; }
 .status-dot.pending { background-color: var(--pending-color); }
 .status-dot.approved { background-color: var(--success-color); }
