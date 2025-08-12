@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // VARIÁVEIS DE CONFIGURAÇÃO
-    const ADMIN_NICK = 'J2Z#1337'; // Defina o nick do admin aqui
+    const ADMIN_NICK = 'J2Z#013'; // Defina o nick do admin aqui
 
     // SELETORES DE ELEMENTOS
     const loginOverlay = document.getElementById('login-overlay');
@@ -54,7 +54,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let students = JSON.parse(localStorage.getItem('students')) || [];
 
     // NOVO: Filtra a lista para remover entradas corrompidas ou undefined.
-    // Isso resolve o problema de 'undefined' que estava aparecendo.
     students = students.filter(s => s && typeof s === 'object' && s.nick);
 
     // FUNÇÕES
@@ -187,37 +186,28 @@ document.addEventListener('DOMContentLoaded', () => {
         return card;
     }
     
+    // NOVO: Lógica de atualização de hires mais robusta
     function handleCardAction(event) {
         const card = event.target.closest('.hire-card');
         const hireId = card.dataset.id;
-        const action = event.target.textContent;
-
+        
         if (event.target.classList.contains('approve-btn')) {
             showConfirmationModal('Tem certeza que deseja aprovar esta contratação?', () => {
-                const hireIndex = hires.findIndex(h => h.id == hireId);
-                if (hireIndex !== -1) {
-                    hires[hireIndex].status = 'approved';
-                    localStorage.setItem('hires', JSON.stringify(hires));
-                    renderApp();
-                }
+                hires = hires.map(h => h.id == hireId ? { ...h, status: 'approved' } : h);
+                localStorage.setItem('hires', JSON.stringify(hires));
+                renderApp();
             });
         } else if (event.target.classList.contains('deny-btn')) {
             showConfirmationModal('Tem certeza que deseja recusar esta contratação?', () => {
-                const hireIndex = hires.findIndex(h => h.id == hireId);
-                if (hireIndex !== -1) {
-                    hires[hireIndex].status = 'denied';
-                    localStorage.setItem('hires', JSON.stringify(hires));
-                    renderApp();
-                }
+                hires = hires.map(h => h.id == hireId ? { ...h, status: 'denied' } : h);
+                localStorage.setItem('hires', JSON.stringify(hires));
+                renderApp();
             });
         } else if (event.target.classList.contains('delete-btn')) {
             showConfirmationModal('Tem certeza que deseja excluir esta contratação? Esta ação é irreversível.', () => {
-                const hireIndex = hires.findIndex(h => h.id == hireId);
-                if (hireIndex !== -1) {
-                    hires.splice(hireIndex, 1);
-                    localStorage.setItem('hires', JSON.stringify(hires));
-                    renderApp();
-                }
+                hires = hires.filter(h => h.id != hireId);
+                localStorage.setItem('hires', JSON.stringify(hires));
+                renderApp();
             });
         }
     }
@@ -264,6 +254,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // NOVO: Removida a chamada redundante para renderAdminPanel
     function handleAdminPanel(event) {
         event.preventDefault();
         const target = event.target;
@@ -274,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (newNick && !existingStudent) {
                 students.push({ nick: newNick, canApply: false });
                 localStorage.setItem('students', JSON.stringify(students));
-                renderAdminPanel();
+                renderAdminPanel(); // Mantém a renderização para mudanças estruturais
                 newStudentNickInput.value = '';
             }
         } else if (target.classList.contains('remove-student-btn')) {
@@ -283,7 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showConfirmationModal(`Tem certeza que deseja remover ${nickToRemove}?`, () => {
                     students = students.filter(s => s.nick !== nickToRemove);
                     localStorage.setItem('students', JSON.stringify(students));
-                    renderAdminPanel();
+                    renderAdminPanel(); // Mantém a renderização para mudanças estruturais
                 });
             }
         } else if (target.type === 'checkbox') {
@@ -292,7 +283,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (student) {
                 student.canApply = target.checked;
                 localStorage.setItem('students', JSON.stringify(students));
-                renderAdminPanel();
+                // Removida a chamada a renderAdminPanel. O CSS agora
+                // é responsável por atualizar a visualização do switch.
             }
         }
     }
