@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- CONFIGURAÇÃO E DADOS ---
     const META_CONTRATACAO = 60;
+    const MIN_CARDS_VISIBLE = 5; // Limite para minimizar os cards
 
     // IMPORTANTE: Defina aqui o Nick do Administrador e a SENHA DE ACESSO.
     const ADMIN_NICK = 'J2Z#013'; 
@@ -55,7 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('allowedApprovers', JSON.stringify(allowedApprovers));
     }
 
-    // CORRIGIDO: Agora a função verifica a permissão de aprovação.
     function renderApp() {
         if (!currentUser) return;
 
@@ -85,6 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // CORRIGIDO: Modificado para minimizar cards a partir do 5º
     function renderCards(list, container, isApprover) {
         container.innerHTML = '';
         if (list.length === 0) {
@@ -92,10 +93,15 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        list.forEach(hire => {
+        list.forEach((hire, index) => {
             const card = document.createElement('div');
             card.className = `hire-card ${hire.status}`;
             card.dataset.id = hire.id;
+            
+            // Adiciona a classe 'minimized' a partir do 5º card
+            if (index >= MIN_CARDS_VISIBLE) {
+                card.classList.add('minimized');
+            }
 
             let actionsHtml = '';
             if (hire.status === 'pending' && isApprover) {
@@ -208,6 +214,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 saveData();
                 renderApp();
+            }
+        });
+    }
+    
+    // NOVO: Adicionado um listener de evento para expandir ou minimizar os cards
+    if (hiresBoard) {
+        hiresBoard.addEventListener('click', (e) => {
+            const target = e.target;
+            const card = target.closest('.hire-card');
+            
+            // Se o clique não foi em um botão dentro do card, alterna a classe
+            if (card && !target.closest('.card-actions')) {
+                card.classList.toggle('minimized');
+            } else if (target.closest('.approve-btn') || target.closest('.deny-btn') || target.closest('.delete-btn')) {
+                // Ação de aprovação/recusa/exclusão, não minimiza
+                handleBoardClick(e);
             }
         });
     }
@@ -359,9 +381,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     addHireForm.addEventListener('submit', handleFormSubmit);
 
-    if (hiresBoard) {
-        hiresBoard.addEventListener('click', handleBoardClick);
-    }
+    // O event listener para os cards agora está no hiresBoard para centralizar o evento
+    // e evitar re-renderizações desnecessárias. A função handleBoardClick foi mantida para
+    // tratar os botões de ação (aprovar/recusar/deletar).
     
     navButtons.forEach(btn => {
         btn.addEventListener('click', handleTabChange);
