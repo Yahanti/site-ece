@@ -85,7 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // CORRIGIDO: Modificado para minimizar cards a partir do 5º
     function renderCards(list, container, isApprover) {
         container.innerHTML = '';
         if (list.length === 0) {
@@ -217,23 +216,35 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
-    // NOVO: Adicionado um listener de evento para expandir ou minimizar os cards
+
     if (hiresBoard) {
         hiresBoard.addEventListener('click', (e) => {
             const target = e.target;
             const card = target.closest('.hire-card');
             
-            // Se o clique não foi em um botão dentro do card, alterna a classe
-            if (card && !target.closest('.card-actions')) {
-                card.classList.toggle('minimized');
-            } else if (target.closest('.approve-btn') || target.closest('.deny-btn') || target.closest('.delete-btn')) {
-                // Ação de aprovação/recusa/exclusão, não minimiza
+            if (!card) return;
+            
+            if (target.closest('.card-actions')) {
+                // Se o clique foi em um botão de ação, processa a ação.
                 handleBoardClick(e);
+            } else {
+                // Se o clique foi no card em si, alterna o estado de minimização.
+                // Verifica se o card já está minimizado.
+                const isMinimized = card.classList.contains('minimized');
+                
+                // Remove a classe 'minimized' de todos os cards na mesma coluna
+                card.closest('.cards-container').querySelectorAll('.hire-card').forEach(c => {
+                    c.classList.add('minimized');
+                });
+                
+                // Se o card original estava minimizado, remove a classe dele para expandir.
+                if (isMinimized) {
+                    card.classList.remove('minimized');
+                }
             }
         });
     }
-
+    
     function togglePasswordInput() {
         const isCurrentUserAdmin = loginNickInput.value.trim() === ADMIN_NICK;
         loginPasswordInput.classList.toggle('hidden', !isCurrentUserAdmin);
@@ -381,9 +392,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     addHireForm.addEventListener('submit', handleFormSubmit);
 
-    // O event listener para os cards agora está no hiresBoard para centralizar o evento
-    // e evitar re-renderizações desnecessárias. A função handleBoardClick foi mantida para
-    // tratar os botões de ação (aprovar/recusar/deletar).
+    // O event listener para os cards agora lida com a minimização e as ações
+    // dentro de um único bloco de código.
     
     navButtons.forEach(btn => {
         btn.addEventListener('click', handleTabChange);
