@@ -48,14 +48,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderApp() {
-        if (!currentUser) {
-            appContainer.classList.add('hidden');
-            loginOverlay.classList.add('active');
-            return;
-        }
+        // Esta função agora é responsável apenas por preencher o conteúdo do app,
+        // não por mostrar/esconder a tela principal.
 
-        loginOverlay.classList.remove('active');
-        appContainer.classList.remove('hidden');
         currentUserNickEl.textContent = currentUser;
 
         const isAdmin = currentUser === ADMIN_NICK;
@@ -175,6 +170,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     loginNickInput.value = '';
                     loginPasswordInput.value = '';
                     saveData();
+                    // Agora a transição é feita por aqui
+                    loginOverlay.classList.remove('active');
+                    appContainer.classList.remove('hidden');
                     renderApp();
                 } else {
                     loginError.textContent = 'Senha incorreta.';
@@ -186,6 +184,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 loginNickInput.value = '';
                 loginPasswordInput.value = '';
                 saveData();
+                // Agora a transição é feita por aqui
+                loginOverlay.classList.remove('active');
+                appContainer.classList.remove('hidden');
                 renderApp();
             }
         } else {
@@ -197,7 +198,9 @@ document.addEventListener('DOMContentLoaded', () => {
         currentUser = null;
         document.body.classList.remove('admin-logged-in');
         saveData();
-        renderApp();
+        // Agora a transição é feita por aqui
+        loginOverlay.classList.add('active');
+        appContainer.classList.add('hidden');
     }
     
     function handleFormSubmit(e) {
@@ -276,6 +279,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- INICIALIZAÇÃO E EVENT LISTENERS ---
+    
+    // NOVO: Lógica de inicialização corrigida
+    if (currentUser) {
+        loginOverlay.classList.remove('active');
+        appContainer.classList.remove('hidden');
+        renderApp();
+    } else {
+        loginOverlay.classList.add('active');
+        appContainer.classList.add('hidden');
+    }
+
     loginForm.addEventListener('submit', handleLogin);
     logoutButton.addEventListener('click', handleLogout);
     openFormButton.addEventListener('click', () => formModalOverlay.classList.add('active'));
@@ -296,6 +310,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     loginNickInput.addEventListener('input', togglePasswordInput);
-
-    renderApp();
 });
