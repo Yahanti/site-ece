@@ -2,10 +2,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- CONFIGURAÇÃO E DADOS ---
     const META_CONTRATACAO = 60;
-
-    // IMPORTANTE: Defina aqui o Nick do Administrador e a SENHA DE ACESSO.
-    const ADMIN_NICK = 'J2Z#013'; 
-    const ADMIN_PASSWORD = 'supercap'; // Altere esta senha para algo seguro!
+    
+    // O nick do Admin não é mais usado para login, mas ainda é útil para
+    // identificar o administrador dentro do app.
+    const ADMIN_NICK = 'CAPExeAdmin#0001'; 
     
     // Carrega dados do localStorage ou inicia arrays vazios.
     let hires = JSON.parse(localStorage.getItem('hiresData')) || [];
@@ -14,10 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- ELEMENTOS DO DOM (HTML) ---
     const loginOverlay = document.getElementById('login-overlay');
-    const loginForm = document.getElementById('login-form');
-    const loginNickInput = document.getElementById('login-nick');
-    const loginPasswordInput = document.getElementById('login-password');
-    const loginError = document.getElementById('login-error');
     const appContainer = document.getElementById('app-container');
     const currentUserNickEl = document.getElementById('current-user-nick');
     const logoutButton = document.getElementById('logout-button');
@@ -156,43 +152,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- MANIPULADORES DE EVENTOS (HANDLERS) ---
-
-    function togglePasswordInput() {
-        const isCurrentUserAdmin = loginNickInput.value.trim() === ADMIN_NICK;
-        loginPasswordInput.classList.toggle('hidden', !isCurrentUserAdmin);
-    }
+    // A lógica de login agora é no js/login.js
     
-    function handleLogin(e) {
-        e.preventDefault();
-        const nick = loginNickInput.value.trim();
-        const password = loginPasswordInput.value.trim();
-
-        if (allowedStudents.includes(nick)) {
-            if (nick === ADMIN_NICK) {
-                if (password === ADMIN_PASSWORD) {
-                    currentUser = nick;
-                    loginError.textContent = '';
-                    loginNickInput.value = '';
-                    loginPasswordInput.value = '';
-                    saveData();
-                    renderApp();
-                } else {
-                    loginError.textContent = 'Senha incorreta.';
-                    loginPasswordInput.value = '';
-                }
-            } else {
-                currentUser = nick;
-                loginError.textContent = '';
-                loginNickInput.value = '';
-                loginPasswordInput.value = '';
-                saveData();
-                renderApp();
-            }
-        } else {
-            loginError.textContent = 'Acesso negado. Nick ou Numeração inválidos.';
-        }
-    }
-
     function handleLogout() {
         currentUser = null;
         document.body.classList.remove('admin-logged-in');
@@ -276,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- INICIALIZAÇÃO E EVENT LISTENERS ---
-    loginForm.addEventListener('submit', handleLogin);
+    // O evento de login agora está em js/login.js
     logoutButton.addEventListener('click', handleLogout);
     openFormButton.addEventListener('click', () => formModalOverlay.classList.add('active'));
     cancelFormButton.addEventListener('click', () => formModalOverlay.classList.remove('active'));
@@ -295,8 +256,6 @@ document.addEventListener('DOMContentLoaded', () => {
       studentList.addEventListener('click', handleAdminPanel);
     }
 
-    loginNickInput.addEventListener('input', togglePasswordInput);
-
+    // Inicia o app
     renderApp();
-
 });

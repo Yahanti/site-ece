@@ -21,13 +21,14 @@
                 <p>Acesso exclusivo para membros autorizados.</p>
             </div>
 
-            <p>Utilize seu Nick + Numeração para acessar o painel de controle.</p>
+            <p>Utilize apenas a senha do Admin para acessar o painel de controle.</p>
+            
             <form id="login-form">
-                <input type="text" id="login-nick" placeholder="Seu Nick#0000" required>
-                <input type="password" id="login-password" placeholder="Senha do Admin" class="hidden">
+                <input type="password" id="password-input" placeholder="Senha do Admin" required>
                 <button type="submit">Conectar</button>
             </form>
-            <p id="login-error" class="error-message"></p>
+            
+            <p id="error-message" class="error-message"></p>
         </div>
 
         <footer class="developer-credit">
@@ -165,7 +166,6 @@
         <p>Desenvolvido por: &lt;/&gt; J2Z</p>
     </footer>
 
-    <script src="script.js"></script>
+    <script src="js/login.js" defer></script>
 </body>
-
 </html>
