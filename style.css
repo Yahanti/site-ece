@@ -229,11 +229,10 @@ button[type="submit"], #open-form-button {
 }
 button[type="submit"]:hover, #open-form-button:hover {
     background-color: var(--primary-red-dark);
-    box-shadow: 0 4px 20px rgba(255, 27, 27, 0.6);
+    box-shadow: 4px 20px rgba(255, 27, 27, 0.6);
 }
 .error-message { color: var(--primary-red); height: 1.2em; font-size: 0.9em; }
 
-/* CORREÇÃO DO RODAPÉ: O rodapé da tela de login continua com 'absolute' */
 .developer-credit {
     position: absolute;
     bottom: 2rem;
@@ -250,7 +249,6 @@ button[type="submit"]:hover, #open-form-button:hover {
     align-items: center;
 }
 
-/* CORREÇÃO DO RODAPÉ: O rodapé da tela do aplicativo volta a ser 'static' e será empurrado pelo flexbox */
 .developer-credit-app {
     position: static;
     margin-top: 2rem;
@@ -264,7 +262,6 @@ button[type="submit"]:hover, #open-form-button:hover {
     align-items: center;
 }
 
-/* Adicionado para que o conteúdo principal ocupe o espaço e empurre o rodapé para o final */
 main {
     flex-grow: 1;
 }
@@ -325,7 +322,30 @@ header {
 
 /* PAINEL KANBAN */
 #hires-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
-.board-column h2 { display: flex; align-items: center; gap: 0.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid #444; font-family: 'Orbitron'; font-size: 1.1em;}
+.board-column h2 { 
+    display: flex; 
+    align-items: center; 
+    gap: 0.5rem; 
+    padding-bottom: 0.5rem; 
+    border-bottom: 2px solid #444; 
+    font-family: 'Orbitron'; 
+    font-size: 1.1em;
+}
+
+/* NOVO: Classes para controlar o alinhamento dos títulos */
+.board-column h2.centered {
+    justify-content: center;
+}
+.board-column h2.spaced {
+    justify-content: space-between;
+}
+.board-column h2 span.count {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    color: var(--primary-red);
+    font-size: 0.9em;
+}
+
 .status-dot { width: 12px; height: 12px; border-radius: 50%; }
 .status-dot.pending { background-color: var(--pending-color); }
 .status-dot.approved { background-color: var(--success-color); }
@@ -341,6 +361,18 @@ header {
     box-shadow: 0 4px 10px rgba(0,0,0,0.5);
     overflow: hidden;
     cursor: pointer;
+    position: relative;
+}
+/* Novo estilo para o número do card */
+.hire-card .card-number {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-family: 'Orbitron', monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    opacity: 0.5;
 }
 
 .hire-card.minimized {
