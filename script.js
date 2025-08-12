@@ -3,13 +3,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- CONFIGURAÇÃO E DADOS ---
     const META_CONTRATACAO = 60;
 
+    // IMPORTANTE: Defina aqui o Nick do Administrador e a SENHA DE ACESSO.
     const ADMIN_NICK = 'J2Z#013'; 
-    const ADMIN_PASSWORD = 'supercap';
+    const ADMIN_PASSWORD = 'supercap'; // Altere esta senha para algo seguro!
     
-    // Carrega dados do localStorage ou inicia arrays vazios
+    // Carrega dados do localStorage ou inicia arrays vazios.
     let hires = JSON.parse(localStorage.getItem('hiresData')) || [];
     let currentUser = localStorage.getItem('currentUser') === 'null' ? null : localStorage.getItem('currentUser');
     let allowedStudents = JSON.parse(localStorage.getItem('allowedStudents')) || [ADMIN_NICK, 'AlunoAprovador#1234', 'LiderEquipe#7777'];
+    // NOVO: Array para usuários com permissão de aprovação
+    let allowedApprovers = JSON.parse(localStorage.getItem('allowedApprovers')) || [ADMIN_NICK];
 
     // --- ELEMENTOS DO DOM (HTML) ---
     const loginOverlay = document.getElementById('login-overlay');
@@ -38,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const newStudentInput = document.getElementById('new-student-nick');
     const studentList = document.getElementById('student-list');
     
-    // NOVO: Elementos do Modal de Confirmação
+    // Elementos do Modal de Confirmação
     const confirmationOverlay = document.getElementById('confirmation-overlay');
     const confirmationMessage = document.getElementById('confirmation-message');
     const confirmActionBtn = document.getElementById('confirm-action-btn');
@@ -50,6 +53,8 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('hiresData', JSON.stringify(hires));
         localStorage.setItem('currentUser', currentUser);
         localStorage.setItem('allowedStudents', JSON.stringify(allowedStudents));
+        // NOVO: Salva a lista de aprovadores
+        localStorage.setItem('allowedApprovers', JSON.stringify(allowedApprovers));
     }
 
     function renderApp() {
@@ -58,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentUserNickEl.textContent = currentUser;
 
         const isAdmin = currentUser === ADMIN_NICK;
+        const isApprover = allowedApprovers.includes(currentUser);
         document.body.classList.toggle('admin-logged-in', isAdmin);
         adminTabButton.classList.toggle('hidden', !isAdmin);
 
@@ -69,9 +75,9 @@ document.addEventListener('DOMContentLoaded', () => {
         countContratadosEl.textContent = approvedCount;
         countFaltamEl.textContent = Math.max(0, META_CONTRATACAO - approvedCount);
         
-        renderCards(pending, pendingCardsContainer);
-        renderCards(approved, approvedCardsContainer);
-        renderCards(denied, deniedCardsContainer);
+        renderCards(pending, pendingCardsContainer, isApprover);
+        renderCards(approved, approvedCardsContainer, isApprover);
+        renderCards(denied, deniedCardsContainer, isApprover);
         
         renderRanking();
         
@@ -80,7 +86,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function renderCards(list, container) {
+    // NOVO: Adiciona o parâmetro isApprover
+    function renderCards(list, container, isApprover) {
         container.innerHTML = '';
         if (list.length === 0) {
             container.innerHTML = `<p class="empty-state" style="text-align: center; color: #555; font-size: 0.9em;">Nenhuma submissão aqui.</p>`;
@@ -93,7 +100,8 @@ document.addEventListener('DOMContentLoaded', () => {
             card.dataset.id = hire.id;
 
             let actionsHtml = '';
-            if (hire.status === 'pending') {
+            // Renderiza os botões de aprovar/recusar apenas se o usuário for um aprovador
+            if (hire.status === 'pending' && isApprover) {
                 actionsHtml += `
                     <button class="approve-btn">Aprovar</button>
                     <button class="deny-btn">Recusar</button>
@@ -149,17 +157,21 @@ document.addEventListener('DOMContentLoaded', () => {
         studentList.innerHTML = allowedStudents.map(student => `
             <li>
                 <span class="student-name">${student}</span>
-                ${student !== ADMIN_NICK ? `<button class="remove-student-btn" data-nick="${student}">Remover</button>` : ''}
+                <div class="permission-control">
+                    ${student !== ADMIN_NICK ? `
+                        <label for="approver-${student}">Aprovador</label>
+                        <input type="checkbox" id="approver-${student}" data-nick="${student}" ${allowedApprovers.includes(student) ? 'checked' : ''}>
+                    ` : ''}
+                    ${student !== ADMIN_NICK ? `<button class="remove-student-btn" data-nick="${student}">Remover</button>` : ''}
+                </div>
             </li>
         `).join('');
     }
     
-    // NOVA FUNÇÃO: Exibe o modal de confirmação
     function showConfirmationModal(message, onConfirm) {
         confirmationMessage.textContent = message;
         confirmationOverlay.classList.add('active');
         
-        // Limpa eventos anteriores para evitar múltiplos listeners
         confirmActionBtn.onclick = null; 
         
         confirmActionBtn.onclick = () => {
@@ -172,6 +184,22 @@ document.addEventListener('DOMContentLoaded', () => {
     
     cancelConfirmationBtn.addEventListener('click', () => {
         confirmationOverlay.classList.remove('active');
+    });
+    
+    // NOVO: Adiciona ou remove o aluno da lista de aprovadores
+    studentList.addEventListener('change', (e) => {
+        const target = e.target;
+        if (target.type === 'checkbox' && target.id.startsWith('approver-')) {
+            const studentNick = target.dataset.nick;
+            if (target.checked) {
+                if (!allowedApprovers.includes(studentNick)) {
+                    allowedApprovers.push(studentNick);
+                }
+            } else {
+                allowedApprovers = allowedApprovers.filter(nick => nick !== studentNick);
+            }
+            saveData();
+        }
     });
 
     function togglePasswordInput() {
@@ -293,8 +321,12 @@ document.addEventListener('DOMContentLoaded', () => {
             
             showConfirmationModal(`Tem certeza que deseja remover ${nickToRemove}?`, () => {
                 allowedStudents = allowedStudents.filter(nick => nick !== nickToRemove);
+                // Remove o aluno também da lista de aprovadores, se ele estiver lá
+                allowedApprovers = allowedApprovers.filter(nick => nick !== nickToRemove);
                 saveData();
                 renderAdminPanel();
+                // Atualiza a interface principal caso um aprovador tenha sido removido
+                renderApp(); 
             });
         }
     }
@@ -315,7 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
     openFormButton.addEventListener('click', () => formModalOverlay.classList.add('active'));
     cancelFormButton.addEventListener('click', () => {
         formModalOverlay.classList.remove('active');
-        addHireForm.reset(); // Limpa o formulário ao cancelar
+        addHireForm.reset();
     });
     addHireForm.addEventListener('submit', handleFormSubmit);
 
@@ -334,4 +366,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loginNickInput.addEventListener('input', togglePasswordInput);
 });
-
