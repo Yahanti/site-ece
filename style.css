@@ -196,12 +196,12 @@ input {
     border-radius: 50%;
 }
 
-/* Corrigido: Seletor para o estado checked */
-.permission-control label input:checked + .slider {
+/* NOVO: Classe para o estado 'ativo' do slider */
+.permission-control .slider.active {
     background-color: var(--primary-red);
 }
 
-.permission-control label input:checked + .slider:before {
+.permission-control .slider.active:before {
     transform: translateX(18px);
 }
 
@@ -323,7 +323,7 @@ header {
 .approve-btn { background-color: var(--success-color); color: #fff; }
 .deny-btn { background-color: var(--primary-red-dark); color: #fff; }
 .delete-btn { background-color: transparent; color: var(--delete-color); border: 1px solid var(--delete-color); }
-.delete-btn:hover { background-color: var(--delete-color); color: #0d0d0d; }
+.delete-btn:hover { background-color: var(--delete-color); color: #000; }
 
 /* FORMULÁRIO */
 #form-actions { margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 1rem; }
