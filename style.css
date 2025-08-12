@@ -133,6 +133,42 @@ input {
     color: var(--text-color); font-size: 1rem; box-sizing: border-box;
     transition: all 0.2s ease;
 }
+
+/* Estilo para a checkbox de aprovação */
+#student-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+#student-list li:last-child {
+    border-bottom: none;
+}
+
+#student-list li .student-name {
+    flex-grow: 1;
+    text-align: left;
+}
+
+.permission-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.permission-control label {
+    font-size: 0.8em;
+    color: var(--text-color);
+}
+
+.permission-control input[type="checkbox"] {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+}
+
 input:focus { outline: none; border-color: var(--primary-red); box-shadow: 0 0 8px rgba(255, 27, 27, 0.4); }
 
 button {
@@ -442,3 +478,4 @@ header {
     }
 
 }
+
