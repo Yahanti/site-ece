@@ -55,12 +55,7 @@ body {
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 27, 27, 0.2);
     text-align: center;
     width: 90%; max-width: 450px;
-    
-    display: flex;
-    flex-direction: column;
-    align-items: center;
 }
-
 .motto {
     font-style: italic;
     font-size: 1.1em;
@@ -233,40 +228,24 @@ button[type="submit"]:hover, #open-form-button:hover {
 }
 .error-message { color: var(--primary-red); height: 1.2em; font-size: 0.9em; }
 
-/* CORREÇÃO DO RODAPÉ: O rodapé da tela de login continua com 'absolute' */
-.developer-credit {
-    position: absolute;
+/* ESTILO CORRIGIDO PARA O CRÉDITO DO DESENVOLVEDOR */
+.developer-credit, .developer-credit-app {
+    position: absolute; /* Usar 'absolute' para posicioná-lo no rodapé */
     bottom: 2rem;
     left: 50%;
     transform: translateX(-50%);
-    width: 100%;
+    
+    width: 100%; 
     padding: 1rem;
     text-align: center;
     color: var(--text-muted);
     font-size: 0.8rem;
     flex-shrink: 0;
+
+    /* AQUI ESTÁ A CORREÇÃO PRINCIPAL: empilhar o conteúdo verticalmente */
     display: flex;
     flex-direction: column;
-    align-items: center;
-}
-
-/* CORREÇÃO DO RODAPÉ: O rodapé da tela do aplicativo volta a ser 'static' e será empurrado pelo flexbox */
-.developer-credit-app {
-    position: static;
-    margin-top: 2rem;
-    padding: 1rem;
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 0.8rem;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-/* Adicionado para que o conteúdo principal ocupe o espaço e empurre o rodapé para o final */
-main {
-    flex-grow: 1;
+    align-items: center; /* Centraliza o texto */
 }
 
 /* CABEÇALHO DO PAINEL */
@@ -310,7 +289,7 @@ header {
     color: var(--primary-red);
     border-bottom-color: var(--primary-red);
 }
-.tab-content { padding: 2rem; }
+.tab-content { padding: 2rem; flex-grow: 1; }
 
 /* PAINEL DE MÉTRICAS */
 #dashboard {
