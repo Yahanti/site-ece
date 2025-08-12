@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Carrega dados do localStorage ou inicia arrays vazios.
     let hires = JSON.parse(localStorage.getItem('hiresData')) || [];
-    // NOVO: Verifica se o valor é a string "null" e o converte para o valor nulo real.
     let currentUser = localStorage.getItem('currentUser') === 'null' ? null : localStorage.getItem('currentUser');
     let allowedStudents = JSON.parse(localStorage.getItem('allowedStudents')) || [ADMIN_NICK, 'AlunoAprovador#1234', 'LiderEquipe#7777'];
 
@@ -39,6 +38,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const addStudentForm = document.getElementById('add-student-form');
     const newStudentInput = document.getElementById('new-student-nick');
     const studentList = document.getElementById('student-list');
+    
+    // NOVO: Elementos do Modal de Confirmação
+    const confirmationOverlay = document.getElementById('confirmation-overlay');
+    const confirmationMessage = document.getElementById('confirmation-message');
+    const confirmActionBtn = document.getElementById('confirm-action-btn');
+    const cancelConfirmationBtn = document.getElementById('cancel-confirmation-btn');
 
     // --- FUNÇÕES DE LÓGICA ---
 
@@ -49,6 +54,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderApp() {
+        if (!currentUser) return;
+
         currentUserNickEl.textContent = currentUser;
 
         const isAdmin = currentUser === ADMIN_NICK;
@@ -147,8 +154,26 @@ document.addEventListener('DOMContentLoaded', () => {
             </li>
         `).join('');
     }
+    
+    // NOVA FUNÇÃO: Exibe o modal de confirmação
+    function showConfirmationModal(message, onConfirm) {
+        confirmationMessage.textContent = message;
+        confirmationOverlay.classList.add('active');
+        
+        // Limpa eventos anteriores para evitar múltiplos listeners
+        confirmActionBtn.onclick = null; 
+        
+        confirmActionBtn.onclick = () => {
+            confirmationOverlay.classList.remove('active');
+            onConfirm();
+        };
+    }
 
     // --- MANIPULADORES DE EVENTOS (HANDLERS) ---
+    
+    cancelConfirmationBtn.addEventListener('click', () => {
+        confirmationOverlay.classList.remove('active');
+    });
 
     function togglePasswordInput() {
         const isCurrentUserAdmin = loginNickInput.value.trim() === ADMIN_NICK;
@@ -193,7 +218,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleLogout() {
         currentUser = null;
         document.body.classList.remove('admin-logged-in');
-        // NOVO: Remove o item do localStorage em vez de apenas salvar como "null"
         localStorage.removeItem('currentUser');
         loginOverlay.classList.add('active');
         appContainer.classList.add('hidden');
@@ -225,21 +249,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if (target.classList.contains('approve-btn')) {
             const hire = hires.find(h => h.id === hireId);
             if (hire) hire.status = 'approved';
+            saveData();
+            renderApp();
         } else if (target.classList.contains('deny-btn')) {
             const hire = hires.find(h => h.id === hireId);
             if (hire) hire.status = 'denied';
+            saveData();
+            renderApp();
         } else if (target.classList.contains('delete-btn')) {
             if (currentUser === ADMIN_NICK) {
-                if (confirm('Tem certeza que deseja excluir esta submissão permanentemente? Esta ação não pode ser desfeita.')) {
+                showConfirmationModal('Tem certeza que deseja excluir esta submissão permanentemente?', () => {
                     hires = hires.filter(h => h.id !== hireId);
-                }
+                    saveData();
+                    renderApp();
+                });
             }
-        } else {
-            return;
         }
-
-        saveData();
-        renderApp();
     }
     
     function handleTabChange(e) {
@@ -266,11 +291,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } else if (target.classList.contains('remove-student-btn')) {
             const nickToRemove = target.dataset.nick;
-            if (confirm(`Tem certeza que deseja remover ${nickToRemove}?`)) {
+            
+            showConfirmationModal(`Tem certeza que deseja remover ${nickToRemove}?`, () => {
                 allowedStudents = allowedStudents.filter(nick => nick !== nickToRemove);
                 saveData();
                 renderAdminPanel();
-            }
+            });
         }
     }
 
@@ -288,7 +314,10 @@ document.addEventListener('DOMContentLoaded', () => {
     loginForm.addEventListener('submit', handleLogin);
     logoutButton.addEventListener('click', handleLogout);
     openFormButton.addEventListener('click', () => formModalOverlay.classList.add('active'));
-    cancelFormButton.addEventListener('click', () => formModalOverlay.classList.remove('active'));
+    cancelFormButton.addEventListener('click', () => {
+        formModalOverlay.classList.remove('active');
+        addHireForm.reset(); // Limpa o formulário ao cancelar
+    });
     addHireForm.addEventListener('submit', handleFormSubmit);
 
     if (hiresBoard) {
