@@ -196,6 +196,7 @@ input {
     border-radius: 50%;
 }
 
+/* Corrigido: Seletor para o estado checked */
 .permission-control label input:checked + .slider {
     background-color: var(--primary-red);
 }
