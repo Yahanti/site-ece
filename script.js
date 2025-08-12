@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // NOVO: Adiciona o parâmetro isApprover para renderização condicional
+    // Adiciona o parâmetro isApprover para renderização condicional
     function renderCards(list, container, isApprover) {
         container.innerHTML = '';
         if (list.length === 0) {
@@ -159,10 +159,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="student-name">${student}</span>
                 <div class="permission-control">
                     ${student !== ADMIN_NICK ? `
-                        <label for="approver-${student}">Aprovador</label>
-                        <input type="checkbox" id="approver-${student}" data-nick="${student}" ${allowedApprovers.includes(student) ? 'checked' : ''}>
+                        <label>
+                            <input type="checkbox" data-nick="${student}" ${allowedApprovers.includes(student) ? 'checked' : ''}>
+                            <span class="slider"></span>
+                        </label>
+                        <button class="remove-student-btn" data-nick="${student}">Remover</button>
                     ` : ''}
-                    ${student !== ADMIN_NICK ? `<button class="remove-student-btn" data-nick="${student}">Remover</button>` : ''}
                 </div>
             </li>
         `).join('');
@@ -186,11 +188,11 @@ document.addEventListener('DOMContentLoaded', () => {
         confirmationOverlay.classList.remove('active');
     });
     
-    // NOVO: Evento para gerenciar a permissão de aprovação
+    // Evento para gerenciar a permissão de aprovação
     if (studentList) {
         studentList.addEventListener('change', (e) => {
             const target = e.target;
-            if (target.type === 'checkbox' && target.id.startsWith('approver-')) {
+            if (target.type === 'checkbox') {
                 const studentNick = target.dataset.nick;
                 if (target.checked) {
                     if (!allowedApprovers.includes(studentNick)) {
