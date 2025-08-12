@@ -224,24 +224,28 @@ button[type="submit"], #open-form-button {
 }
 button[type="submit"]:hover, #open-form-button:hover {
     background-color: var(--primary-red-dark);
-    box-shadow: 0 44px 20px rgba(255, 27, 27, 0.6);
+    box-shadow: 0 4px 20px rgba(255, 27, 27, 0.6);
 }
 .error-message { color: var(--primary-red); height: 1.2em; font-size: 0.9em; }
 
 /* ESTILO CORRIGIDO PARA O CRÉDITO DO DESENVOLVEDOR */
 .developer-credit, .developer-credit-app {
-    position: static;
-    margin-top: 2rem;
+    position: absolute; /* Usar 'absolute' para posicioná-lo no rodapé */
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    
+    width: 100%; 
     padding: 1rem;
     text-align: center;
     color: var(--text-muted);
     font-size: 0.8rem;
     flex-shrink: 0;
-}
-/* Estilo para os parágrafos dentro do rodapé */
-.developer-credit p, .developer-credit-app p {
-    display: block; 
-    margin: 0;     
+
+    /* AQUI ESTÁ A CORREÇÃO PRINCIPAL: empilhar o conteúdo verticalmente */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centraliza o texto */
 }
 
 /* CABEÇALHO DO PAINEL */
