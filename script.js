@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // VARIÁVEIS DE CONFIGURAÇÃO
-    const ADMIN_NICK = 'J2Z#013'; // Defina o nick do admin aqui
+    const ADMIN_NICK = 'J2Z#1337'; // Defina o nick do admin aqui
 
     // SELETORES DE ELEMENTOS
     const loginOverlay = document.getElementById('login-overlay');
@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const isAdmin = nick === ADMIN_NICK;
 
         if (isAdmin) {
-            if (password === 'super') { // Defina a senha do admin aqui
+            if (password === 'senhaadmin123') { // Defina a senha do admin aqui
                 currentUser = nick;
                 localStorage.setItem('currentUser', currentUser);
                 loginOverlay.classList.remove('active');
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
         faltamCount.textContent = faltam;
     }
 
-    // Função modificada para corrigir o alinhamento
+    // Função modificada para adicionar a contagem aos cards e colunas
     function renderHires() {
         pendingCardsContainer.innerHTML = '';
         approvedCardsContainer.innerHTML = '';
@@ -119,6 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let approvedCount = 0;
         let deniedCount = 0;
 
+        // Filtra e renderiza os cards, atribuindo um número de ordem
         hires.forEach(hire => {
             let cardNumber = null;
             if (hire.status === 'approved') {
@@ -139,20 +140,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
-        // Títulos das colunas com classes para controlar o alinhamento
-        const pendingTitleH2 = pendingColumn.querySelector('h2');
-        pendingTitleH2.className = 'centered';
-        pendingTitleH2.innerHTML = `<span class="status-dot pending"></span>Análise Pendente`;
-        
-        const approvedTitleH2 = approvedColumn.querySelector('h2');
-        approvedTitleH2.className = 'spaced';
-        approvedTitleH2.innerHTML = `<span class="status-dot approved"></span>Contratados Aprovados <span class="count">(${approvedCount})</span>`;
-        
-        const deniedTitleH2 = deniedColumn.querySelector('h2');
-        deniedTitleH2.className = 'spaced';
-        deniedTitleH2.innerHTML = `<span class="status-dot denied"></span>Submissões Recusadas <span class="count">(${deniedCount})</span>`;
+        // Atualiza o título das colunas com a contagem total
+        approvedColumn.querySelector('h2').innerHTML = `<span class="status-dot approved"></span>Contratados Aprovados <span class="count">(${approvedCount})</span>`;
+        deniedColumn.querySelector('h2').innerHTML = `<span class="status-dot denied"></span>Submissões Recusadas <span class="count">(${deniedCount})</span>`;
+        pendingColumn.querySelector('h2').innerHTML = `<span class="status-dot pending"></span>Análise Pendente`;
     }
 
+    // Função modificada para receber a numeração do card
     function createHireCard(hire, cardNumber) {
         const card = document.createElement('div');
         card.className = `hire-card ${hire.status}`;
