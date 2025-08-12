@@ -47,7 +47,6 @@ body {
 }
 .overlay.active { opacity: 1; visibility: visible; }
 
-/* CORRIGIDO: Adicionei display: flex e flex-direction: column para centralizar tudo na caixa de login */
 #login-box, #form-box {
     background: var(--light-bg);
     padding: 2.5rem 3rem;
@@ -56,12 +55,7 @@ body {
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 27, 27, 0.2);
     text-align: center;
     width: 90%; max-width: 450px;
-    
-    display: flex; /* Adicionado para arrumar o layout */
-    flex-direction: column; /* Adicionado para empilhar os itens */
-    align-items: center; /* Adicionado para centralizar horizontalmente */
 }
-
 .motto {
     font-style: italic;
     font-size: 1.1em;
@@ -234,23 +228,15 @@ button[type="submit"]:hover, #open-form-button:hover {
 }
 .error-message { color: var(--primary-red); height: 1.2em; font-size: 0.9em; }
 
-/* ESTILO CORRIGIDO PARA O CRÉDITO DO DESENVOLVEDOR */
+/* NOVO: ESTILO PARA O CRÉDITO DO DESENVOLVEDOR */
 .developer-credit, .developer-credit-app {
-    position: absolute; 
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    
-    width: 100%; 
+    position: static;
+    margin-top: 2rem;
     padding: 1rem;
     text-align: center;
     color: var(--text-muted);
     font-size: 0.8rem;
     flex-shrink: 0;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center; 
 }
 
 /* CABEÇALHO DO PAINEL */
@@ -323,7 +309,7 @@ header {
     border-left: 5px solid;
     transition: transform 0.2s ease, box-shadow 0.2s ease, height 0.3s ease, padding 0.3s ease;
     box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-    overflow: hidden;
+    overflow: hidden; /* Adicionado para esconder o conteúdo extra */
     cursor: pointer;
 }
 
