@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let hires = JSON.parse(localStorage.getItem('hiresData')) || [];
     let currentUser = localStorage.getItem('currentUser') === 'null' ? null : localStorage.getItem('currentUser');
     let allowedStudents = JSON.parse(localStorage.getItem('allowedStudents')) || [ADMIN_NICK, 'AlunoAprovador#1234', 'LiderEquipe#7777'];
-    // NOVO: Array para usuários com permissão de aprovação
     let allowedApprovers = JSON.parse(localStorage.getItem('allowedApprovers')) || [ADMIN_NICK];
 
     // --- ELEMENTOS DO DOM (HTML) ---
@@ -53,7 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('hiresData', JSON.stringify(hires));
         localStorage.setItem('currentUser', currentUser);
         localStorage.setItem('allowedStudents', JSON.stringify(allowedStudents));
-        // NOVO: Salva a lista de aprovadores
         localStorage.setItem('allowedApprovers', JSON.stringify(allowedApprovers));
     }
 
@@ -86,7 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Adiciona o parâmetro isApprover para renderização condicional
     function renderCards(list, container, isApprover) {
         container.innerHTML = '';
         if (list.length === 0) {
@@ -100,7 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
             card.dataset.id = hire.id;
 
             let actionsHtml = '';
-            // Renderiza os botões de aprovar/recusar apenas se o usuário for um aprovador
             if (hire.status === 'pending' && isApprover) {
                 actionsHtml += `
                     <button class="approve-btn">Aprovar</button>
@@ -152,6 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `).join('');
     }
 
+    // Corrigido: Renderiza o label para o toggle switch corretamente
     function renderAdminPanel() {
         if (!studentList) return;
         studentList.innerHTML = allowedStudents.map(student => `
@@ -188,7 +185,6 @@ document.addEventListener('DOMContentLoaded', () => {
         confirmationOverlay.classList.remove('active');
     });
     
-    // Evento para gerenciar a permissão de aprovação
     if (studentList) {
         studentList.addEventListener('change', (e) => {
             const target = e.target;
@@ -202,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     allowedApprovers = allowedApprovers.filter(nick => nick !== studentNick);
                 }
                 saveData();
-                renderApp(); // Atualiza a interface para refletir a mudança
+                renderApp();
             }
         });
     }
