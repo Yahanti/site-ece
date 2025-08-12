@@ -22,6 +22,8 @@ body {
     margin: 0;
     overflow-x: hidden;
     min-height: 100vh;
+    display: flex; /* Adicionado */
+    flex-direction: column; /* Adicionado */
 }
 
 .logo {
@@ -228,12 +230,13 @@ button[type="submit"]:hover, #open-form-button:hover {
 
 /* NOVO: ESTILO PARA O CRÉDITO DO DESENVOLVEDOR */
 .developer-credit, .developer-credit-app {
-    position: absolute;
-    bottom: 1rem;
-    left: 50%;
-    transform: translateX(-50%);
+    position: static; /* Alterado para static */
+    margin-top: 2rem; /* Adicionado uma margem para espaçamento */
+    padding: 1rem; /* Adicionado padding para melhor visualização */
+    text-align: center;
     color: var(--text-muted);
     font-size: 0.8rem;
+    flex-shrink: 0; /* Adicionado */
 }
 
 /* CABEÇALHO DO PAINEL */
@@ -277,7 +280,7 @@ header {
     color: var(--primary-red);
     border-bottom-color: var(--primary-red);
 }
-.tab-content { padding: 2rem; }
+.tab-content { padding: 2rem; flex-grow: 1; }
 
 /* PAINEL DE MÉTRICAS */
 #dashboard {
