@@ -14,11 +14,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutButton = document.getElementById('logout-button');
 
     const navButtons = document.querySelectorAll('.nav-button');
-    const tabs = document.querySelectorAll('.tab-content');
     const adminTabButton = document.querySelector('[data-tab="admin-tab"]');
 
     const contratadosCount = document.getElementById('contratados-count');
     const faltamCount = document.getElementById('faltam-count');
+
+    const pendingColumn = document.getElementById('pending-column');
+    const approvedColumn = document.getElementById('approved-column');
+    const deniedColumn = document.getElementById('denied-column');
 
     const pendingCardsContainer = document.getElementById('pending-cards');
     const approvedCardsContainer = document.getElementById('approved-cards');
@@ -107,13 +110,27 @@ document.addEventListener('DOMContentLoaded', () => {
         faltamCount.textContent = faltam;
     }
 
+    // Função modificada para adicionar a contagem aos cards e colunas
     function renderHires() {
         pendingCardsContainer.innerHTML = '';
         approvedCardsContainer.innerHTML = '';
         deniedCardsContainer.innerHTML = '';
 
+        let approvedCount = 0;
+        let deniedCount = 0;
+
+        // Filtra e renderiza os cards, atribuindo um número de ordem
         hires.forEach(hire => {
-            const hireCard = createHireCard(hire);
+            let cardNumber = null;
+            if (hire.status === 'approved') {
+                approvedCount++;
+                cardNumber = approvedCount;
+            } else if (hire.status === 'denied') {
+                deniedCount++;
+                cardNumber = deniedCount;
+            }
+
+            const hireCard = createHireCard(hire, cardNumber);
             if (hire.status === 'pending') {
                 pendingCardsContainer.appendChild(hireCard);
             } else if (hire.status === 'approved') {
@@ -122,13 +139,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 deniedCardsContainer.appendChild(hireCard);
             }
         });
+        
+        // Atualiza o título das colunas com a contagem total
+        approvedColumn.querySelector('h2').innerHTML = `<span class="status-dot approved"></span>Contratados Aprovados <span class="count">(${approvedCount})</span>`;
+        deniedColumn.querySelector('h2').innerHTML = `<span class="status-dot denied"></span>Submissões Recusadas <span class="count">(${deniedCount})</span>`;
+        pendingColumn.querySelector('h2').innerHTML = `<span class="status-dot pending"></span>Análise Pendente`;
     }
 
-    function createHireCard(hire) {
+    // Função modificada para receber a numeração do card
+    function createHireCard(hire, cardNumber) {
         const card = document.createElement('div');
         card.className = `hire-card ${hire.status}`;
         card.dataset.id = hire.id;
         card.innerHTML = `
+            ${cardNumber ? `<span class="card-number">#${cardNumber}</span>` : ''}
             <h3>${hire.nick}</h3>
             <p><strong>Submetido por:</strong> ${hire.submittedBy}</p>
             <p><strong>Print:</strong> <a href="${hire.printUrl}" target="_blank">Visualizar</a></p>
@@ -284,7 +308,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
     
-    // NOVO: Função para exibir/ocultar o campo de senha
     function toggleAdminPasswordInput() {
         const isCurrentUserAdmin = loginNickInput.value.trim() === ADMIN_NICK;
         loginPasswordInput.classList.toggle('hidden', !isCurrentUserAdmin);
@@ -320,6 +343,5 @@ document.addEventListener('DOMContentLoaded', () => {
         studentList.addEventListener('click', handleAdminPanel);
     }
     
-    // NOVO: Adiciona o evento para alternar a senha de admin
     loginNickInput.addEventListener('input', toggleAdminPasswordInput);
 });
