@@ -165,7 +165,7 @@ input {
     gap: 0.5rem;
 }
 
-/* NOVO: Estilo para o toggle switch */
+/* NOVO: ESTILO DO SWITCH */
 .permission-control label {
     position: relative;
     display: inline-block;
@@ -203,12 +203,12 @@ input {
     border-radius: 50%;
 }
 
-/* NOVO: Classe para o estado 'ativo' do slider */
-.permission-control .slider.active {
+/* NOVO: REGRAS CORRETAS PARA O ESTADO ATIVO USANDO :checked */
+.permission-control input:checked + .slider {
     background-color: var(--primary-red);
 }
 
-.permission-control .slider.active:before {
+.permission-control input:checked + .slider:before {
     transform: translateX(18px);
 }
 
@@ -332,7 +332,6 @@ header {
     font-size: 1.1em;
 }
 
-/* NOVO: Classes para controlar o alinhamento dos títulos */
 .board-column h2.centered {
     justify-content: center;
 }
@@ -363,7 +362,6 @@ header {
     cursor: pointer;
     position: relative;
 }
-/* Novo estilo para o número do card */
 .hire-card .card-number {
     position: absolute;
     top: 1rem;
